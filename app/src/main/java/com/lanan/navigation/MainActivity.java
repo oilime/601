@@ -106,7 +106,7 @@ public class MainActivity extends Activity {
                         }
                         PortClass port = new PortClass(getCurrentDevFile(), 115200, 0);
                         port.open(MainActivity.this);
-                        myOrder = new Order(sData, port);
+                        myOrder = new Order(data, port);
                         myOrder.write();
                         port.close();
                     }
@@ -148,7 +148,10 @@ public class MainActivity extends Activity {
                     bundle.putDouble("latitude", info.getLat());
                     message.setData(bundle);
                     mHandler.sendMessage(message);
-                    myDraw.drawNew(info);
+                    if (info.equals(locationInfos.get(0)))
+                        myDraw.drawOrigin(info);
+                    else
+                        myDraw.drawNew(info);
                 }
             }
         });

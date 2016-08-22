@@ -62,8 +62,8 @@ public class MyDraw extends View {
         startX = attrs.getAttributeFloatValue(null, "originX", 1);
         startY = attrs.getAttributeFloatValue(null, "originY", 1);
 
-        path.moveTo(width/2, height/2);
-        path.addCircle(width/2, height/2, 1, Path.Direction.CW);
+//        path.moveTo(width/2, height/2);
+//        path.addCircle(width/2, height/2, 1, Path.Direction.CW);
     }
 
     public MyDraw(Context context, AttributeSet attrs, int defStyle){
@@ -80,6 +80,15 @@ public class MyDraw extends View {
         float y = (float) (((startY - point.getLat())/(north - south)) * height + height/2);
 
         path.lineTo(x, y);
+        path.addCircle(x, y, 1, Path.Direction.CW);
+        postInvalidate();
+    }
+
+    public void drawOrigin(LocationInfo point) {
+        float x = (float) (((point.getLng() - startX)/(east - west)) * width + width/2);
+        float y = (float) (((startY - point.getLat())/(north - south)) * height + height/2);
+
+        path.moveTo(x, y);
         path.addCircle(x, y, 1, Path.Direction.CW);
         postInvalidate();
     }

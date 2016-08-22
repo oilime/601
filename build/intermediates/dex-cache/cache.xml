@@ -1,2 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<items version="2" />
+<items version="2" >
+
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="57a9f50606d1208b7b6e1f6c18a8ccf617657189">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/instant-run_6cb7ac4e75c282c90a349dbd7ef3ed9427266bef.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/animated-vector-drawable/24.2.0/jars/classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="f3ee23ef25c9a8fe3d40246d0b7097267963a612">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/com.android.support-animated-vector-drawable-24.2.0_9abc4f8eefba7af909d9e6c0a034692ef92bca3f.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/support-compat/24.2.0/jars/libs/internal_impl-24.2.0.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="771b3cc0e597b54da25f8086ba73180c59c6bc71">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/internal_impl-24.2.0_20f94705f592948659b439b421220e19f15673bb.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/support-core-ui/24.2.0/jars/libs/internal_impl-24.2.0.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="6e02e34594ebe9c0501ffda8dd48497f81b82977">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/internal_impl-24.2.0_7f0b7fbbf3b1ad190d74d61010b79c1146c1ef36.jar" />
+    </item>
+    <item
+        jar="/home/emilio/Android/Sdk/extras/android/m2repository/com/android/support/support-annotations/24.2.0/support-annotations-24.2.0.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="6be858a75633b1f0a2d24cad740db57775cb6871">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/support-annotations-24.2.0_e8c0d9c998d70f3c9f21290da4c5664211f9c4c8.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/support-v4/24.2.0/jars/classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="45f5eda279825ff470e3f51019d374d1ef61e000">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/com.android.support-support-v4-24.2.0_b52b7835d72eebfb6534c1c7ec5da5d47421bfbc.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/support-core-utils/24.2.0/jars/classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="fcc945a86ebcbf527429acb8216ec7dae2c06417">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/com.android.support-support-core-utils-24.2.0_49965784a3869ae7fca8bcc3d2eb7da8382202f2.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="dabd811e4d7ac22b21180dde9749efd13547203e">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/instant-run-bootstrap_dd2aeeeafa19775d90c7d0ff7f411775bcabfc2e.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/support-fragment/24.2.0/jars/classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="d8bd2268fdcbfd52c76ade65d9900cd8def93a44">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/com.android.support-support-fragment-24.2.0_9c96cc71cba20fbfcc37c3d59bfc0306e117936d.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/24.2.0/jars/classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="c3c638be6e650b165ab9ae144857b64e82787fad">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/com.android.support-appcompat-v7-24.2.0_c39f1f5f893c9c86e2e003d49cef3cde5096cc06.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/support-vector-drawable/24.2.0/jars/classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="beac40bcc8a320a896dd15f5109cfcaea5e1e0e3">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/com.android.support-support-vector-drawable-24.2.0_af14db00ad0aaffb93e2240d6d97028a83e7c36f.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/support-core-utils/24.2.0/jars/libs/internal_impl-24.2.0.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="60d7b23621d31e6f42f4f76f16af467e57a20cda">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/internal_impl-24.2.0_a323e1bb3081a91e238efb6df2ef603f4d325ddf.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/support-media-compat/24.2.0/jars/libs/internal_impl-24.2.0.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="045be695d968dd707691cc55d23746dbf8cf569a">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/internal_impl-24.2.0_c61ea72976824ad93b3538e0318933be56723d26.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/support-compat/24.2.0/jars/classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="f9b41622897665678d31d78e57a361cb0cebcb0d">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/com.android.support-support-compat-24.2.0_a3ca95fc3b863b84aea6273ca9f0bc9af8d2cfc0.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/support-media-compat/24.2.0/jars/classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="6eb9107eb34d2fe2b020662b7fbbec991dcba846">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/com.android.support-support-media-compat-24.2.0_60923999c8e27bc0ce9417c9ee5d7f7b7cbf2e5b.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/support-fragment/24.2.0/jars/libs/internal_impl-24.2.0.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="032a4b53def5e2ceedfc2e793b126c0163cfa1dd">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/internal_impl-24.2.0_3883af0e4fe4ecef441ffc3341e1377c4bee975d.jar" />
+    </item>
+    <item
+        jar="/home/emilio/AS_project/com_project/app/build/intermediates/exploded-aar/com.android.support/support-core-ui/24.2.0/jars/classes.jar"
+        jumboMode="true"
+        revision="24.0.1"
+        sha1="c84e216d9bf618464d6b9564d71d9a656433e7c4">
+        <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/pre-dexed/debug/com.android.support-support-core-ui-24.2.0_67e134e4ed7cfe26274b7048c3a9d97491d86e7d.jar" />
+    </item>
+
+</items>
