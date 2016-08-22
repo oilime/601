@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/zigbeetransmission/src/main/java/com/lanan/zigbeetransmission/serialport/IDeviceIf.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/zigbeetransmission/src/main/java/com/lanan/zigbeetransmission/serialport/SPCdcAcmDevlflImp.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/zigbeetransmission/src/main/java/com/lanan/zigbeetransmission/serialport/SPCp21xxDevlflImp.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/zigbeetransmission/src/main/java/com/lanan/zigbeetransmission/serialport/SPFTDIDevIfImp.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/zigbeetransmission/src/main/java/com/lanan/zigbeetransmission/serialport/SPProlificDevIfImp.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/zigbeetransmission/src/main/java/com/lanan/zigbeetransmission/serialport/USBPid.java" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>

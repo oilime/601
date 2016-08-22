@@ -1,0 +1,153 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.lanan.navigation.MainActivity"
+    tools:ignore="MergeRootFrame">
+
+    <com.lanan.navigation.draw.MyDraw
+        originX="112.992146"
+        originY="28.210455"
+        w="112.987146"
+        e="112.997146"
+        n="28.215455"
+        s="28.205455"
+        android:layout_width="900px"
+        android:layout_height="900px"
+        android:id="@+id/path"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="10dp" />
+
+    <Button
+        android:layout_width="300px"
+        android:layout_height="90px"
+        android:text="发送离散路径点"
+        android:id="@+id/sendlocation"
+        android:layout_alignTop="@+id/drawpath"
+        android:layout_alignLeft="@+id/path"
+        android:layout_alignStart="@+id/path" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NW:"
+        android:id="@+id/nw"
+        android:textColor="#ffffff"
+        android:layout_alignStart="@+id/path"
+        android:layout_alignTop="@+id/path"
+        android:layout_alignLeft="@+id/path" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NE:"
+        android:id="@+id/ne"
+        android:textColor="#ffffff"
+        android:layout_alignEnd="@+id/path"
+        android:layout_alignTop="@+id/path"
+        android:layout_alignRight="@+id/path" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SW:"
+        android:id="@+id/sw"
+        android:textColor="#ffffff"
+        android:layout_alignBottom="@+id/path"
+        android:layout_alignLeft="@+id/path" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SE:"
+        android:id="@+id/se"
+        android:textColor="#ffffff"
+        android:layout_alignBottom="@+id/path"
+        android:layout_alignRight="@+id/path" />
+
+    <Button
+        android:layout_width="300px"
+        android:layout_height="90px"
+        android:text="绘制路径"
+        android:id="@+id/drawpath"
+        android:layout_below="@+id/path"
+        android:layout_toRightOf="@+id/sendlocation"
+        android:layout_toEndOf="@+id/sendlocation" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/showtext"
+        android:background="#000000"
+        android:textColor="#ffffff"
+        android:layout_below="@+id/textView"
+        android:layout_alignLeft="@+id/textView"
+        android:layout_alignStart="@+id/textView"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:scrollbars="vertical"
+        android:fadeScrollbars="false"/>
+
+    <Button
+        android:layout_width="300px"
+        android:layout_height="90px"
+        android:text="接收导航数据"
+        android:id="@+id/recvnavigation"
+        android:layout_alignTop="@+id/recvlocation"
+        android:layout_alignLeft="@+id/sendnavigation"
+        android:layout_alignStart="@+id/sendnavigation" />
+
+    <Button
+        android:layout_width="300px"
+        android:layout_height="90px"
+        android:text="发送导航数据"
+        android:id="@+id/sendnavigation"
+        android:layout_below="@+id/path"
+        android:layout_toRightOf="@+id/drawpath"
+        android:layout_toEndOf="@+id/drawpath" />
+
+    <Button
+        android:layout_width="300px"
+        android:layout_height="90px"
+        android:text="接收离散路径点"
+        android:id="@+id/recvlocation"
+        android:layout_below="@+id/sendlocation"
+        android:layout_toLeftOf="@+id/drawpath"
+        android:layout_toStartOf="@+id/drawpath" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="信息显示"
+        android:id="@+id/textView"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/path"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:textSize="20sp" />
+
+    <Button
+        android:layout_width="300px"
+        android:layout_height="90px"
+        android:text="关闭端口"
+        android:id="@+id/closeport"
+        android:layout_alignBottom="@+id/recvnavigation"
+        android:layout_alignLeft="@+id/drawpath"
+        android:layout_alignStart="@+id/drawpath" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="开始获取gps"
+        android:id="@+id/gps"
+        android:layout_below="@+id/recvnavigation"
+        android:layout_alignRight="@+id/recvnavigation"
+        android:layout_alignLeft="@+id/recvnavigation" />
+
+</RelativeLayout>
+
