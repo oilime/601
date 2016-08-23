@@ -76,7 +76,7 @@ public class SPCdcAcmDevlflImp implements IDeviceIf {
 			if (mConnection == null) {
 				throw new RuntimeException("���豸ʧ��");
 			}
-			if (mConnection.claimInterface(device.getInterface(0), true) == false) {
+			if (!mConnection.claimInterface(device.getInterface(0), true)) {
 				throw new RuntimeException("���豸�ӿ�ʧ��");
 			}
 			purgeHwBuffers();
@@ -104,7 +104,7 @@ public class SPCdcAcmDevlflImp implements IDeviceIf {
 				try {
 					mConnection.close();
 				} catch (Exception e1) {
-
+					e1.printStackTrace();
 				}
 			}
 		}

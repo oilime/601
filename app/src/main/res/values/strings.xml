@@ -2,7 +2,5 @@
 <resources>
 
     <string name="app_name">导航</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
 
 </resources>

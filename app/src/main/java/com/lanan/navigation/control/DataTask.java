@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.lanan.navigation.algorithm.NativeInterface;
 import com.lanan.navigation.model.Direction;
-import com.lanan.navigation.model.TriRegon;
+import com.lanan.navigation.model.TriRegion;
 import com.lanan.zigbeetransmission.dataclass.LocationInfo;
 import com.lanan.zigbeetransmission.dataclass.NavigationInfo;
 
@@ -13,13 +13,13 @@ import java.util.ArrayList;
 public class DataTask extends Thread {
 	
 	private LocationInfo mLocation;
-	private TriRegon triregon;
+	private TriRegion triRegion;
 	private ArrayList<LocationInfo> destination;
 	private int currentL = 0;
-	private boolean initflag = true;
+	private boolean initFlag = true;
     private boolean interrupt = false;
 
-    NavigationInfo info;
+    private NavigationInfo info;
 
     public ArrayList<LocationInfo> getDestination() {
 		return destination;
@@ -37,7 +37,7 @@ public class DataTask extends Thread {
 		this.interrupt = interrupt;
 	}
     
-	public  synchronized LocationInfo getmLocation() {
+	private   synchronized LocationInfo getmLocation() {
 		return mLocation;
 	}
 	public  synchronized  void setmLocation(LocationInfo mLocation) {
@@ -61,40 +61,39 @@ public class DataTask extends Thread {
                     e.printStackTrace();
                 }
             }
-//            location = new LocationInfo(112.951909, 28.179999);
-            if(initflag){
-                triregon = null;
-                triregon = NativeInterface.gen(location.getLng(), location.getLat(),
+            if(initFlag){
+                triRegion = null;
+                triRegion = NativeInterface.gen(location.getLng(), location.getLat(),
                         destination.get(currentL).getLng(), destination.get(currentL).getLat());
-                while(triregon == null){
+                while(triRegion == null){
                     try {
                         sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    triregon = NativeInterface.gen(location.getLng(), location.getLat(),
+                    triRegion = NativeInterface.gen(location.getLng(), location.getLat(),
                             destination.get(currentL).getLng(), destination.get(currentL).getLat());
                 }
-                initflag = false;
+                initFlag = false;
             }
             direction = NativeInterface.nav(location.getLng(), location.getLat(),
                     destination.get(currentL).getLng(), destination.get(currentL).getLat());
             if(direction.getDis() <=  NativeInterface.LIMIT_REGEN){
                 currentL++;
-                initflag = true;
-                setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL,
+                initFlag = true;
+                setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL + 1,
                         true, false));
                 continue;
             }
-            if(NativeInterface.rck(location.getLng(), location.getLat(), triregon.getmA().getLng(), triregon.getmA().getLat(),
-                    triregon.getmB().getLng(), triregon.getmB().getLat(),
-                    triregon.getmO().getLng(), triregon.getmO().getLat())){
-                initflag = true;
-                setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL,
+            if(!NativeInterface.rck(location.getLng(), location.getLat(), triRegion.getmA().getLng(), triRegion.getmA().getLat(),
+                    triRegion.getmB().getLng(), triRegion.getmB().getLat(),
+                    triRegion.getmO().getLng(), triRegion.getmO().getLat())){
+                initFlag = true;
+                setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL + 1,
                         false, true));
                 continue;
             }
-            setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL,
+            setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL + 1,
                     false, false));
         }
         if (currentL == destination.size()){
@@ -108,7 +107,7 @@ public class DataTask extends Thread {
         }
 
     }
-    public void setInfo (NavigationInfo ofni) {
+    private void setInfo (NavigationInfo ofni) {
         synchronized (this.getClass()){
             this.info = ofni;
         }

@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import com.lanan.zigbeetransmission.dataclass.LocationInfo;
@@ -29,8 +30,8 @@ public class MyDraw extends View {
     double south;
     double startX;
     double startY;
-    int width = 900;
-    int height = 900;
+    int width;
+    int height;
 
     public MyDraw(Context context) {
         super(context);
@@ -61,9 +62,6 @@ public class MyDraw extends View {
         south = attrs.getAttributeFloatValue(null, "s", 1);
         startX = attrs.getAttributeFloatValue(null, "originX", 1);
         startY = attrs.getAttributeFloatValue(null, "originY", 1);
-
-//        path.moveTo(width/2, height/2);
-//        path.addCircle(width/2, height/2, 1, Path.Direction.CW);
     }
 
     public MyDraw(Context context, AttributeSet attrs, int defStyle){
@@ -85,6 +83,11 @@ public class MyDraw extends View {
     }
 
     public void drawOrigin(LocationInfo point) {
+        height = this.getMeasuredHeight();
+        width = this.getMeasuredWidth();
+
+        Log.d("Emilio", "height: " + height + " width: " + width);
+
         float x = (float) (((point.getLng() - startX)/(east - west)) * width + width/2);
         float y = (float) (((startY - point.getLat())/(north - south)) * height + height/2);
 

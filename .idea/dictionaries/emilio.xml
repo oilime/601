@@ -3,10 +3,16 @@
     <words>
       <w>cdcacm</w>
       <w>devlfl</w>
+      <w>drawpath</w>
+      <w>getm</w>
       <w>mydraw</w>
       <w>navi</w>
+      <w>navnostar</w>
+      <w>recvlocation</w>
       <w>rnav</w>
+      <w>sendlocation</w>
       <w>serialport</w>
+      <w>setm</w>
       <w>spftdi</w>
     </words>
   </dictionary>

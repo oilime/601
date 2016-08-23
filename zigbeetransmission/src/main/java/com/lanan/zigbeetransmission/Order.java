@@ -4,10 +4,12 @@ import android.util.Log;
 
 import com.lanan.zigbeetransmission.dataclass.LocationInfo;
 import com.lanan.zigbeetransmission.dataclass.NavigationInfo;
+import com.lanan.zigbeetransmission.dataclass.PortClass;
 import com.lanan.zigbeetransmission.dataclass.SendPackage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 
 public class Order {
 
@@ -30,23 +32,24 @@ public class Order {
     private ArrayList<SendPackage> recvList;
     private ArrayList<LocationInfo> locationList;
     private ArrayList<NavigationInfo> navigationList = new ArrayList<>();
-    private ArrayList<NavigationInfo> recvNavigationList = new ArrayList<>();
+    private LinkedList<NavigationInfo> recvNavigationList = new LinkedList<>();
     private PortClass port;
     private int count = 0;
-    private int getCount = 0;
 
     public enum Type {SET_ORIGIN, UNPACK_ORIGIN, SET_NAVIGATION, UNPACK_NAVIGATION}
     private Type orderType;
     boolean SUCCESS = true;
     boolean FAIL = false;
+    boolean isReadFinished = false;
+    boolean isWriteFinished = false;
 
     private byte[] doBuffer = new byte[1024];
     private int doCount = 0;
 
-    Thread receive;
-    Thread send;
-    Thread handleNav;
-    Thread handleOri;
+    private Thread receive;
+    private Thread send;
+    private Thread handleNav;
+    private Thread handleOri;
 
     public Order() {
         super();
@@ -278,7 +281,6 @@ public class Order {
                                     nPoint.setYawStatus(false);
                                 }
                             }
-
                             recvNavigationList.add(nPoint);
                         } else {
                             break;
@@ -300,10 +302,10 @@ public class Order {
                     bufferSet(readBuffer);
                     while ((len = port.read(readBuffer, 0, readBuffer.length)) != -1) {
                         setDoBuffer(readBuffer, len);
+                        bufferSet(readBuffer);
                         Thread.sleep(500);
                     }
                 }
-                Log.d("Emilio", "Receive: break");
             }catch (Exception e) {
                 e.printStackTrace();
             }
@@ -320,7 +322,7 @@ public class Order {
                         port.write(navigationPackage, 0, navigationPackage.length);
                         count++;
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(500);
                         }catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -328,7 +330,6 @@ public class Order {
                     }
                 }
             }
-            Log.d("Emilio", "Send: break");
         }
     }
 
@@ -343,7 +344,6 @@ public class Order {
                         recvList.add(new SendPackage(p));
                     }
                 }
-                Log.d("Emilio", "Handle: break");
             }catch (Exception e) {
                 e.printStackTrace();
             }
@@ -365,7 +365,7 @@ public class Order {
                         }
                     }
                 }
-                Log.d("Emilio", "UNPACK_ORIGIN: break");
+                isReadFinished = true;
             }catch (Exception e) {
                 e.printStackTrace();
             }
@@ -396,7 +396,7 @@ public class Order {
                     byte[] writeBuffer = p.getPackageData();
                     port.write(writeBuffer, 0, writeBuffer.length);
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(500);
                     }catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -414,14 +414,13 @@ public class Order {
         return locationList;
     }
 
-    public ArrayList<NavigationInfo> getNavigationDataList() {
-        return recvNavigationList;
-    }
-
     public NavigationInfo getNavigationInfo() {
-        if (getCount <= (recvNavigationList.size() - 1))
-            return recvNavigationList.get(getCount++);
-        else
+        if (!recvNavigationList.isEmpty()){
+            NavigationInfo info = recvNavigationList.getLast();
+            recvNavigationList.clear();
+            recvList.clear();
+            return info;
+        } else
             return null;
     }
 
@@ -436,16 +435,24 @@ public class Order {
 
     public void stopAllThread() {
         if (send != null && send.isAlive()) {
+            Log.d("Emilio", "send interrupt");
             send.interrupt();
+            send = null;
         }
         if (receive != null && receive.isAlive()) {
+            Log.d("Emilio", "receive interrupt");
             receive.interrupt();
+            receive = null;
         }
         if (handleNav != null && handleNav.isAlive()) {
+            Log.d("Emilio", "handleNav interrupt");
             handleNav.interrupt();
+            handleNav = null;
         }
         if (handleOri != null && handleOri.isAlive()) {
+            Log.d("Emilio", "handleOri interrupt");
             handleOri.interrupt();
+            handleOri = null;
         }
     }
 
@@ -470,6 +477,28 @@ public class Order {
             }
         }
         return null;
+    }
+
+    public void stop(){
+        stopAllThread();
+        this.port.close();
+        doBuffer = null;
+        sendList = null;
+        recvList = null;
+        recvNavigationList = null;
+        locationList = null;
+        navigationList = null;
+    }
+
+    public boolean getStatus() {
+        switch (orderType) {
+            case UNPACK_ORIGIN:
+                return isReadFinished;
+            case SET_NAVIGATION:
+                return isWriteFinished;
+            default:
+                return false;
+        }
     }
 
     private int bytes2Int(byte[] b) {

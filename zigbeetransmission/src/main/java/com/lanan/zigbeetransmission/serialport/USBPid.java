@@ -48,8 +48,7 @@ public class USBPid {
 
 	    if (this.mVendorId != testObj.mVendorId) {
 	      return false;
-	    }
-	    if (this.mProductId != testObj.mProductId) {
+	    } else if (this.mProductId != testObj.mProductId) {
 	      return false;
 	    }
 	    return true;

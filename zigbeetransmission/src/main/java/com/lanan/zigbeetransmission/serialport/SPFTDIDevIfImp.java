@@ -36,7 +36,7 @@ public class SPFTDIDevIfImp implements IDeviceIf{
     public static final int USB_ENDPOINT_OUT = 0x00;
     private static final int  SIO_SET_DTR_MASK = 0x1;
     private static final int  SIO_SET_DTR_HIGH =( 1 | ( SIO_SET_DTR_MASK  << 8));
-    private static final int  SIO_SET_DTR_LOW =( 0 | ( SIO_SET_DTR_MASK  << 8));
+    private static final int  SIO_SET_DTR_LOW =(SIO_SET_DTR_MASK  << 8);
     private static final int  SIO_SET_RTS_MASK = 0x2;
     private static final int  SIO_SET_RTS_HIGH =( 2 | ( SIO_SET_RTS_MASK << 8 ));
     private static final int  SIO_SET_RTS_LOW = ( SIO_SET_RTS_MASK << 8 );
@@ -114,7 +114,7 @@ public class SPFTDIDevIfImp implements IDeviceIf{
 			if(mConnection == null){
 				throw new RuntimeException("打开设备失败");
 			}
-			if(mConnection.claimInterface(device.getInterface(0), true) == false){
+			if(!mConnection.claimInterface(device.getInterface(0), true)){
 				throw new RuntimeException("打开设备接口失败");
 			}
 			purgeHwBuffers();
@@ -284,7 +284,7 @@ public class SPFTDIDevIfImp implements IDeviceIf{
 	{
         int config = dataBits; 
         if(parity.equals(SP_OPTION_PNONE)){
-        	config |= (0x00 << 8);
+        	config |= (0);
         }else if(parity.equals(SP_OPTION_PODD)){
         	config |= (0x01 << 8);
         }else if(parity.equals(SP_OPTION_PEVEN)){
@@ -297,7 +297,7 @@ public class SPFTDIDevIfImp implements IDeviceIf{
         	throw new IllegalArgumentException("Unknown parity value: " + parity);
 		}
         if(stopBits.equals(SP_OPTION_SBONE)){
-        	config |= (0x00 << 11);
+        	config |= (0);
         }else if(stopBits.equals(SP_OPTION_SBONEPOINTFIVE)){
         	config |= (0x01 << 11);
         }else if(stopBits.equals(SP_OPTION_SBTWO)){
@@ -336,9 +336,7 @@ public class SPFTDIDevIfImp implements IDeviceIf{
               );
 	}
 	
-	private static enum DeviceType
-	{
-		TYPE_BM, TYPE_AM, TYPE_2232C, TYPE_R, TYPE_2232H, TYPE_4232H;
+	private enum DeviceType {
+		TYPE_BM, TYPE_AM, TYPE_2232C, TYPE_R, TYPE_2232H, TYPE_4232H
 	}
-	
 }

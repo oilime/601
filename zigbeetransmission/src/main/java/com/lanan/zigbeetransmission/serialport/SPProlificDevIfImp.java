@@ -33,10 +33,9 @@ public class SPProlificDevIfImp implements IDeviceIf {
 
 	private static final int PROLIFIC_VENDOR_WRITE_REQUEST = 0x01;
 
-	private static final int PROLIFIC_VENDOR_OUT_REQTYPE = UsbConstants.USB_DIR_OUT | UsbConstants.USB_TYPE_VENDOR;
+	private static final int PROLIFIC_VENDOR_OUT_REQTYPE = UsbConstants.USB_TYPE_VENDOR;
 
-	private static final int PROLIFIC_CTRL_OUT_REQTYPE = UsbConstants.USB_DIR_OUT | UsbConstants.USB_TYPE_CLASS
-			| USB_RECIP_INTERFACE;
+	private static final int PROLIFIC_CTRL_OUT_REQTYPE = UsbConstants.USB_TYPE_CLASS | USB_RECIP_INTERFACE;
 
 	private static final int FLUSH_RX_REQUEST = 0x08;
 	private static final int FLUSH_TX_REQUEST = 0x09;
@@ -99,7 +98,7 @@ public class SPProlificDevIfImp implements IDeviceIf {
 			if (mConnection == null) {
 				throw new RuntimeException("打开设备失败");
 			}
-			if (mConnection.claimInterface(device.getInterface(0), true) == false) {
+			if (!mConnection.claimInterface(device.getInterface(0), true)) {
 				throw new RuntimeException("打开设备接口失败");
 			}
 			
