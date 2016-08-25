@@ -20,18 +20,18 @@ public class MyDraw extends View {
     private Paint realBrush = new Paint();
     private Path path = new Path();
 
+    private DecimalFormat decimalFormat = new DecimalFormat("#.000000");
+
+    private double west = 112.986218;
+    private double east = 112.998074;
+    private double north = 28.215455;
+    private double south = 28.205455;
+    private double startX = (west + east) / 2;
+    private double startY = (north + south) / 2;
+    private int width;
+    private int height;
+
     public enum location {WEST, EAST, NORTH, SOUTH}
-
-    DecimalFormat decimalFormat = new DecimalFormat("#.000000");
-
-    double west = 112.986218;
-    double east = 112.998074;
-    double north = 28.215455;
-    double south = 28.205455;
-    double startX = 112.992146;
-    double startY = 28.210455;
-    int width;
-    int height;
 
     public MyDraw(Context context) {
         super(context);
@@ -39,7 +39,6 @@ public class MyDraw extends View {
 
     public MyDraw(Context context, AttributeSet attrs){
         super(context,attrs);
-
         this.setBackgroundColor(Color.GRAY);
 
         oriBrush.setAntiAlias(true);

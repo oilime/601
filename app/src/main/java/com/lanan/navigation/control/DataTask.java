@@ -37,10 +37,10 @@ public class DataTask extends Thread {
 		this.interrupt = interrupt;
 	}
     
-	private   synchronized LocationInfo getmLocation() {
+	private synchronized LocationInfo getmLocation() {
 		return mLocation;
 	}
-	public  synchronized  void setmLocation(LocationInfo mLocation) {
+	public synchronized  void setmLocation(LocationInfo mLocation) {
 		this.mLocation = mLocation;
 	}
     
@@ -54,7 +54,6 @@ public class DataTask extends Thread {
 		    }
 
             while((location = getmLocation()) == null){
-//                Log.e("sqh","location is null");
                 try {
                     Thread.sleep(1000);
                 }catch (Exception e) {

@@ -75,7 +75,7 @@
         jar="/home/emilio/AS_project/com_project/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
         jumboMode="true"
         revision="24.0.1"
-        sha1="e95c604c9531a460659070e4552d157f1272b9e8">
+        sha1="7b7f915eefc845922d998e7af91ee02263a4a070">
         <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_6cb7ac4e75c282c90a349dbd7ef3ed9427266bef/classes.dex" />
     </item>
     <item
@@ -96,7 +96,7 @@
         jar="/home/emilio/AS_project/com_project/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
         jumboMode="true"
         revision="24.0.1"
-        sha1="21302fd169dc6aafbb7cb1120fcf83453632e042">
+        sha1="dd63da75a56558b4e4e2c1b95155110d843d883d">
         <dex dex="/home/emilio/AS_project/com_project/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_dd2aeeeafa19775d90c7d0ff7f411775bcabfc2e/classes.dex" />
     </item>
     <item

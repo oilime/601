@@ -3,7 +3,9 @@ package com.lanan.navigation.activities;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.speech.tts.TextToSpeech;
@@ -31,8 +33,9 @@ import com.lanan.zigbeetransmission.dataclass.NavigationInfo;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -45,15 +48,21 @@ public class MainActivity extends Activity {
     private static TextView screen;
     private static TextView longitude;
     private static TextView latitude;
-    private static final String TAG = "Emilio";
-
-    private NavigationInfo nInfo;
-    private static SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
 
     private double[][] data =   {{112.992146,28.210455}, {112.992511,28.210442},
             {112.992792,28.213875}, {112.993196,28.213836}, {112.995725,28.213625},
             {112.99771,28.213358},  {112.997912,28.213342}, {112.997822,28.212547}};
 
+//    private NavigationInfo nInfo;
+    private Order myOrder;
+    private DataTask dataTask;
+//    private boolean isGpsStop = false;
+    private boolean isDrawStop;
+    private LinkedList<LocationInfo> showList = new LinkedList<>();
+    private OutputStreamWriter out;
+    private LocationClient mLocationClient;
+
+    private static int curPos = 1;
     private static final int SL = 0;
     private static final int RL = 1;
     private static final int SN = 2;
@@ -64,52 +73,57 @@ public class MainActivity extends Activity {
     private static final int WRITE_EXTERNAL_STORAGE = 8;
     private static final int READ_PHONE_STATE = 9;
 
-    private Order myOrder;
-    private DataTask dataTask;
-
-    private boolean isGpsStop = false;
-    private boolean isDrawStop = false;
-
-    private LinkedList<LocationInfo> showList = new LinkedList<>();
-
-    private OutputStream out;
+    private static final String TAG = "Emilio";
     private static TextToSpeech speech;
+    private static SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
+    private static DecimalFormat normalFormat = new DecimalFormat("#.00");
+    private static DecimalFormat lngFormat = new DecimalFormat("#.000000");
 
-    private static int curPos = 1;
-
-    private LocationClientOption mOption;
-    private LocationClient mLocationClient;
+    private static int SDK_VERSION = Build.VERSION.SDK_INT;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         SDKInitializer.initialize(getApplicationContext());
-
         setContentView(R.layout.huawei);
 
+        try {
+            File file = new File(Environment.getExternalStorageDirectory().getPath() + "/gpsdata/info.txt");
+            if (!file.exists()) {
+                boolean recv = file.createNewFile();
+            }
+            out = new OutputStreamWriter(new FileOutputStream(file));
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        isDrawStop = false;
+
         mLocationClient = new LocationClient(this);
-        mOption = new LocationClientOption();
+        LocationClientOption mOption = new LocationClientOption();
         mOption.setOpenGps(true);
         mOption.setCoorType("bd09ll");
         mOption.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
         mOption.setScanSpan(1000);
-        mLocationClient.setLocOption(mOption);
 
+        mLocationClient.setLocOption(mOption);
         mLocationClient.registerLocationListener(new BDLocationListener() {
             @Override
             public void onReceiveLocation(BDLocation bdLocation) {
                 if(bdLocation == null){
-                    Log.d("Emilio", "null");
+                    return;
+                }
+
+                if (bdLocation.getLocType() != 61 && bdLocation.getLocType() != 161) {
                     return;
                 }
 
                 LocationInfo info = new LocationInfo(bdLocation.getLongitude(), bdLocation.getLatitude());
-                String cutdate = timeFormat.format(System.currentTimeMillis());
-                String data = "时间：" + cutdate + " 经度：" + info.getLng() + " 纬度：" + info.getLat() + "\n";
+                String curDate = timeFormat.format(System.currentTimeMillis());
+                String data = "时间：" + curDate + " 经度：" + info.getLng() + " 纬度：" + info.getLat() + "\n";
 
                 try {
-                    out.write(data.getBytes("utf-8"));
+                    out.write(data);
                     out.flush();
                 }catch (Exception e) {
                     e.printStackTrace();
@@ -230,11 +244,13 @@ public class MainActivity extends Activity {
                     else
                         myDraw.drawNew(infos);
                 }
+                dataTask = new DataTask();
                 dataTask.setDestination(locationInfos);
                 dataTask.start();
 
                 VoiceThread voiceThread = new VoiceThread();
                 voiceThread.start();
+                isDrawStop = false;
 
                 new Thread(new Runnable() {
                     @Override
@@ -243,7 +259,7 @@ public class MainActivity extends Activity {
                             NavigationInfo info = dataTask.getInfo();
                             if (info != null) {
                                 if (info.isArrived()){
-                                    dataTask.interrupt();
+                                    dataTask.setInterrupt(true);
                                     isDrawStop = true;
                                     break;
                                 }
@@ -265,7 +281,6 @@ public class MainActivity extends Activity {
                         }
                     }
                 }).start();
-
             }
         });
 
@@ -275,8 +290,13 @@ public class MainActivity extends Activity {
                 if (myOrder != null){
                     myOrder = null;
                 }
-                isGpsStop = true;
+//                isGpsStop = true;
                 isDrawStop = true;
+
+                if (dataTask.isAlive()) {
+                    dataTask.setInterrupt(true);
+                    dataTask = null;
+                }
             }
         });
 
@@ -291,46 +311,32 @@ public class MainActivity extends Activity {
 
         PermissionCheck();
 
-        dataTask = new DataTask();
-        try {
-            File file = new File("/sdcard/gpsdata/info.txt");
-            if (!file.exists()) {
-                boolean recv = file.createNewFile();
-            }
-            out = new FileOutputStream(file);
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-
         speech = new TextToSpeech(MainActivity.this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
-                if (status == TextToSpeech.SUCCESS) {
-                    //TODO
-                }
             }
         });
     }
 
-    public synchronized void setnInfo(NavigationInfo info){
-        nInfo = info;
-    }
-
-    public synchronized NavigationInfo getnInfo(){
-        return nInfo;
-    }
-
-    private String parseByte2HexStr(byte[] buf) {
-        StringBuilder sb = new StringBuilder();
-        for (byte i: buf) {
-            String hex = Integer.toHexString(i & 0xFF);
-            if (hex.length() == 1) {
-                hex = '0' + hex;
-            }
-            sb.append(hex.toUpperCase());
-        }
-        return sb.toString();
-    }
+//    public synchronized void setnInfo(NavigationInfo info){
+//        nInfo = info;
+//    }
+//
+//    public synchronized NavigationInfo getnInfo(){
+//        return nInfo;
+//    }
+//
+//    private String parseByte2HexStr(byte[] buf) {
+//        StringBuilder sb = new StringBuilder();
+//        for (byte i: buf) {
+//            String hex = Integer.toHexString(i & 0xFF);
+//            if (hex.length() == 1) {
+//                hex = '0' + hex;
+//            }
+//            sb.append(hex.toUpperCase());
+//        }
+//        return sb.toString();
+//    }
 
     private static void refreshScreen(String msg){
         screen.append(msg);
@@ -365,44 +371,51 @@ public class MainActivity extends Activity {
                     double angle = bundle.getDouble("angle");
                     int pos = bundle.getInt("pos");
                     boolean yaw = bundle.getBoolean("yaw", false);
-                    refreshScreen("Time: " + time + "\nDistance: " + dis + " Angle: " + angle + "\nPos: " + pos + "\n");
+                    refreshScreen("Time: " + time +
+                            "\nDistance: " + normalFormat.format(dis) +
+                            " Angle: " + normalFormat.format(angle) +
+                            "\nPos: " + pos + "\n");
                     if (pos > curPos) {
                         int a = Double.valueOf(dis).intValue();
                         int b = Double.valueOf(angle).intValue();
-                        speech.speak("已到达第" + curPos + "路径点", TextToSpeech.QUEUE_FLUSH, null, null);
-                        speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null, null);
-                        speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null, null);
+                        if (SDK_VERSION >= Build.VERSION_CODES.LOLLIPOP) {
+                            speech.speak("已到达第" + (pos - 1) + "路径点", TextToSpeech.QUEUE_FLUSH, null, null);
+                            speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null, null);
+                            speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null, null);
+                        }
                         curPos = pos;
                     }
                     if (yaw) {
                         refreshScreen("偏航！\n偏航！偏航！\n偏航！偏航！偏航！\n");
-                        speech.speak("偏航", TextToSpeech.QUEUE_FLUSH, null, null);
+                        if (SDK_VERSION >= Build.VERSION_CODES.LOLLIPOP) {
+                            speech.speak("偏航", TextToSpeech.QUEUE_FLUSH, null, null);
+                        }
                     }
                     break;
                 case LNG_LAT:
                     double ln = bundle.getDouble("longitude");
                     double la = bundle.getDouble("latitude");
-                    longitude.setText(String.valueOf(ln));
-                    latitude.setText(String.valueOf(la));
+                    longitude.setText(lngFormat.format(ln));
+                    latitude.setText(lngFormat.format(la));
                     break;
             }
         }
     }
 
-    private static class ShowHandler extends Handler{
-        private final WeakReference<Activity> mActivity;
-        public ShowHandler(Activity activity) {
-            mActivity = new WeakReference<>(activity);
-        }
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case RECV_LOCATION:
-                    screen.append("已接受到路径点信息\n");
-                    break;
-            }
-        }
-    }
+//    private static class ShowHandler extends Handler{
+//        private final WeakReference<Activity> mActivity;
+//        public ShowHandler(Activity activity) {
+//            mActivity = new WeakReference<>(activity);
+//        }
+//        @Override
+//        public void handleMessage(Message msg) {
+//            switch (msg.what) {
+//                case RECV_LOCATION:
+//                    screen.append("已接受到路径点信息\n");
+//                    break;
+//            }
+//        }
+//    }
 
     private static class VoiceHandler extends Handler {
         private final WeakReference<Activity> mActivity;
@@ -418,34 +431,16 @@ public class MainActivity extends Activity {
             double angle = bundle.getDouble("angle");
             int b = Double.valueOf(angle).intValue();
             int pos = bundle.getInt("pos");
-            speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null, null);
-            speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null, null);
+            if (SDK_VERSION >= Build.VERSION_CODES.LOLLIPOP){
+                speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null, null);
+                speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null, null);
+            }
         }
     }
 
     private Handler mHandler = new MyHandler(this);
-    public Handler showHandler = new ShowHandler(this);
+//    public Handler showHandler = new ShowHandler(this);
     private Handler voiceHandler = new VoiceHandler(this);
-
-    private void PermissionCheck(){
-    /* 权限检查 */
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "无gps权限");
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    ACCESS_FINE_LOCATION);
-        }else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "无写文件权限");
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    WRITE_EXTERNAL_STORAGE);
-        }else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "无读取手机状态权限");
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE},
-                    READ_PHONE_STATE);
-        }
-    }
 
     private class VoiceThread extends Thread {
         @Override
@@ -470,43 +465,27 @@ public class MainActivity extends Activity {
         }
     }
 
-    @Override
-    protected void onResume() throws SecurityException{
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() throws SecurityException{
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() throws SecurityException{
-        super.onDestroy();
-        if (myOrder != null) {
-//            myOrder.stop();
-            myOrder = null;
-        }
-        if (out != null) {
-            try {
-                out.close();
-            }catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        if(mLocationClient != null && mLocationClient.isStarted()) {
-            mLocationClient.stop();
-            mLocationClient=null;
-        }
-
-        if (speech != null) {
-            speech.stop();
-            speech.shutdown();
+    private void PermissionCheck(){
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "无gps权限");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    ACCESS_FINE_LOCATION);
+        }else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "无写文件权限");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    WRITE_EXTERNAL_STORAGE);
+        }else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "无读取手机状态权限");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE},
+                    READ_PHONE_STATE);
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,@NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case ACCESS_FINE_LOCATION:
@@ -531,5 +510,40 @@ public class MainActivity extends Activity {
                 }
                 break;
         }
+    }
+
+    @Override
+    protected void onDestroy() throws SecurityException{
+        super.onDestroy();
+        isDrawStop = true;
+        if (myOrder != null) {
+//            myOrder.stop();
+            myOrder = null;
+        }
+        if (out != null) {
+            try {
+                out.close();
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if(mLocationClient != null && mLocationClient.isStarted()) {
+            mLocationClient.stop();
+            mLocationClient = null;
+        }
+
+        if (speech != null) {
+            speech.stop();
+            speech.shutdown();
+        }
+
+        if (dataTask != null && dataTask.isAlive()) {
+            dataTask.setInterrupt(true);
+            dataTask = null;
+        }
+
+        screen = null;
+        longitude = null;
+        latitude = null;
     }
 }

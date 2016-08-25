@@ -12,6 +12,10 @@ import android.util.Log;
 
 public class SerialPort {
 
+	static {
+		System.loadLibrary("serial_port");
+	}
+
 	private static final String TAG = "SerialPort";
 
 	/*
@@ -65,8 +69,4 @@ public class SerialPort {
 	// JNI
 	private native static FileDescriptor open(String path, int baudrate, int flags);
 	public native void close();
-	
-	static {
-		System.loadLibrary("serial_port");
-	}
 }

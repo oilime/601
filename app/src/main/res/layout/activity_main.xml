@@ -13,15 +13,15 @@
         e="112.998074"
         n="28.215455"
         s="28.205455"
-        android:layout_width="500dp"
-        android:layout_height="500dp"
+        android:layout_width="489dp"
+        android:layout_height="489dp"
         android:id="@+id/path"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:layout_margin="10dp" />
 
     <Button
-        android:layout_width="166dp"
+        android:layout_width="244dp"
         android:layout_height="50dp"
         android:text="@string/send_location"
         android:id="@+id/sendlocation"
@@ -65,7 +65,7 @@
         android:layout_alignEnd="@+id/path" />
 
     <Button
-        android:layout_width="166dp"
+        android:layout_width="244dp"
         android:layout_height="50dp"
         android:text="@string/draw_path"
         android:id="@+id/drawpath"
@@ -84,31 +84,16 @@
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
         android:scrollbars="vertical"
-        android:fadeScrollbars="false"/>
+        android:fadeScrollbars="false"
+        android:textSize="12sp" />
 
     <Button
-        android:layout_width="166dp"
-        android:layout_height="50dp"
-        android:text="@string/recv_navigation"
-        android:id="@+id/recvnavigation"
-        android:layout_alignTop="@+id/recvlocation"
-        android:layout_alignStart="@+id/sendnavigation" />
-
-    <Button
-        android:layout_width="166dp"
-        android:layout_height="50dp"
-        android:text="@string/send_navigation"
-        android:id="@+id/sendnavigation"
-        android:layout_below="@+id/path"
-        android:layout_toEndOf="@+id/drawpath" />
-
-    <Button
-        android:layout_width="166dp"
+        android:layout_width="244dp"
         android:layout_height="50dp"
         android:text="@string/recv_location"
         android:id="@+id/recvlocation"
         android:layout_below="@+id/sendlocation"
-        android:layout_alignStart="@+id/closeport" />
+        android:layout_alignStart="@+id/sendlocation" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -123,20 +108,12 @@
         android:textSize="20sp" />
 
     <Button
-        android:layout_width="166dp"
+        android:layout_width="244dp"
         android:layout_height="50dp"
         android:text="@string/close_port"
         android:id="@+id/closeport"
-        android:layout_below="@+id/recvlocation"
-        android:layout_toStartOf="@+id/gps" />
-
-    <Button
-        android:layout_width="166dp"
-        android:layout_height="50dp"
-        android:text="@string/get_gps"
-        android:id="@+id/gps"
         android:layout_below="@+id/drawpath"
-        android:layout_toStartOf="@+id/recvnavigation" />
+        android:layout_alignStart="@+id/drawpath" />
 
     <TextView
         android:layout_width="wrap_content"
