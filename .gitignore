@@ -39,3 +39,4 @@ captures/
 
 # Keystore files
 *.jks
+将删除 zigbeetransmission/src/main/res/drawable/
