@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.lanan.navigation"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 24
     }
 
@@ -16,9 +16,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
 }
 
 dependencies {
     compile 'com.android.support:support-v4:24.2.0'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile files('libs/BaiduLBS_Android.jar')
     compile project(':zigbeetransmission')
 }

@@ -55,6 +55,14 @@ public class Order {
         super();
     }
 
+    public Order(double[][] data) {
+        locationList = new ArrayList<>();
+        for (double[] p: data) {
+            LocationInfo info = new LocationInfo(p[0], p[1]);
+            locationList.add(info);
+        }
+    }
+
     public Order(double[][] data, PortClass port) {
         this.port = port;
         locationList = new ArrayList<>();

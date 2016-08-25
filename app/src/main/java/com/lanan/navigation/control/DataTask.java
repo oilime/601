@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.lanan.navigation.algorithm.NativeInterface;
 import com.lanan.navigation.model.Direction;
-import com.lanan.navigation.model.TriRegion;
+import com.lanan.navigation.model.TriRegon;
 import com.lanan.zigbeetransmission.dataclass.LocationInfo;
 import com.lanan.zigbeetransmission.dataclass.NavigationInfo;
 
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class DataTask extends Thread {
 	
 	private LocationInfo mLocation;
-	private TriRegion triRegion;
+	private TriRegon triRegion;
 	private ArrayList<LocationInfo> destination;
 	private int currentL = 0;
 	private boolean initFlag = true;
@@ -54,9 +54,9 @@ public class DataTask extends Thread {
 		    }
 
             while((location = getmLocation()) == null){
-                Log.e("sqh","location is null");
+//                Log.e("sqh","location is null");
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(1000);
                 }catch (Exception e) {
                     e.printStackTrace();
                 }

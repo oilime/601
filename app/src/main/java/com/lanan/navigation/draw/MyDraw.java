@@ -24,12 +24,12 @@ public class MyDraw extends View {
 
     DecimalFormat decimalFormat = new DecimalFormat("#.000000");
 
-    double west;
-    double east;
-    double north;
-    double south;
-    double startX;
-    double startY;
+    double west = 112.986218;
+    double east = 112.998074;
+    double north = 28.215455;
+    double south = 28.205455;
+    double startX = 112.992146;
+    double startY = 28.210455;
     int width;
     int height;
 
@@ -55,13 +55,6 @@ public class MyDraw extends View {
         realBrush.setStrokeWidth(2);
 
         this.brush = oriBrush;
-
-        west = attrs.getAttributeFloatValue(null, "w", 1);
-        east = attrs.getAttributeFloatValue(null, "e", 1);
-        north = attrs.getAttributeFloatValue(null, "n", 1);
-        south = attrs.getAttributeFloatValue(null, "s", 1);
-        startX = attrs.getAttributeFloatValue(null, "originX", 1);
-        startY = attrs.getAttributeFloatValue(null, "originY", 1);
     }
 
     public MyDraw(Context context, AttributeSet attrs, int defStyle){

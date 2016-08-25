@@ -7,32 +7,26 @@
     tools:ignore="MergeRootFrame">
 
     <com.lanan.navigation.draw.MyDraw
-        originX="112.992146"
-        originY="28.210455"
-        w="112.987146"
-        e="112.997146"
-        n="28.215455"
-        s="28.205455"
-        android:layout_width="600px"
-        android:layout_height="600px"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
         android:id="@+id/path"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:layout_margin="10dp" />
 
     <Button
-        android:layout_width="150px"
-        android:layout_height="120px"
-        android:text="发送离散路径点"
+        android:layout_width="125dp"
+        android:layout_height="30dp"
+        android:text="@string/send_location"
         android:id="@+id/sendlocation"
         android:layout_alignTop="@+id/drawpath"
         android:layout_alignStart="@+id/path"
-        android:textSize="6sp" />
+        android:textSize="12sp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="NW:"
+        android:text="@string/nw"
         android:id="@+id/nw"
         android:textColor="#ffffff"
         android:layout_alignStart="@+id/path"
@@ -42,7 +36,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="NE:"
+        android:text="@string/ne"
         android:id="@+id/ne"
         android:textColor="#ffffff"
         android:layout_alignEnd="@+id/path"
@@ -52,7 +46,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SW:"
+        android:text="@string/sw"
         android:id="@+id/sw"
         android:textColor="#ffffff"
         android:layout_alignBottom="@+id/path"
@@ -62,7 +56,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SE:"
+        android:text="@string/se"
         android:id="@+id/se"
         android:textColor="#ffffff"
         android:layout_alignBottom="@+id/path"
@@ -70,13 +64,13 @@
         android:textSize="8sp" />
 
     <Button
-        android:layout_width="150px"
-        android:layout_height="120px"
-        android:text="绘制路径"
+        android:layout_width="125dp"
+        android:layout_height="30dp"
+        android:text="@string/draw_path"
         android:id="@+id/drawpath"
         android:layout_below="@+id/path"
         android:layout_toEndOf="@+id/sendlocation"
-        android:textSize="6sp" />
+        android:textSize="12sp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -89,83 +83,55 @@
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
         android:scrollbars="vertical"
-        android:textSize="12sp"
+        android:textSize="8sp"
         android:fadeScrollbars="false"
         android:layout_alignStart="@+id/textView" />
 
     <Button
-        android:layout_width="150px"
-        android:layout_height="120px"
-        android:text="接收导航数据"
-        android:id="@+id/recvnavigation"
-        android:layout_alignTop="@+id/recvlocation"
-        android:layout_alignStart="@+id/sendnavigation"
-        android:textSize="6sp" />
-
-    <Button
-        android:layout_width="150px"
-        android:layout_height="120px"
-        android:text="发送导航数据"
-        android:id="@+id/sendnavigation"
-        android:layout_below="@+id/path"
-        android:layout_toEndOf="@+id/drawpath"
-        android:textSize="6sp" />
-
-    <Button
-        android:layout_width="150px"
-        android:layout_height="120px"
-        android:text="接收离散路径点"
+        android:layout_width="125dp"
+        android:layout_height="30dp"
+        android:text="@string/recv_location"
         android:id="@+id/recvlocation"
         android:layout_below="@+id/sendlocation"
         android:layout_toStartOf="@+id/drawpath"
-        android:textSize="6sp" />
+        android:textSize="12sp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="信息显示"
+        android:text="@string/show_information"
         android:id="@+id/textView"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/path"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
-        android:textSize="20sp" />
+        android:textSize="16sp" />
 
     <Button
-        android:layout_width="150px"
-        android:layout_height="120px"
-        android:text="关闭端口"
+        android:layout_width="125dp"
+        android:layout_height="30dp"
+        android:text="@string/close_port"
         android:id="@+id/closeport"
-        android:layout_alignBottom="@+id/recvnavigation"
         android:layout_alignStart="@+id/drawpath"
-        android:textSize="6sp"
+        android:textSize="12sp"
         android:layout_alignTop="@+id/recvlocation" />
 
-    <Button
-        android:layout_width="150px"
-        android:layout_height="120px"
-        android:text="开始获取gps"
-        android:id="@+id/gps"
-        android:textSize="6sp"
-        android:layout_alignTop="@+id/sendnavigation"
-        android:layout_toEndOf="@+id/recvnavigation" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="经度:"
+        android:text="@string/longitude"
         android:id="@+id/lng"
-        android:textSize="14sp"
-        android:layout_marginStart="98dp"
+        android:textSize="12sp"
+        android:layout_marginStart="15dp"
         android:layout_alignTop="@+id/textView"
-        android:layout_alignStart="@+id/textView" />
+        android:layout_toEndOf="@+id/textView" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="纬度:"
+        android:text="@string/latitude"
         android:id="@+id/lat"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:layout_below="@+id/lng"
         android:layout_alignStart="@+id/lng" />
 
@@ -175,13 +141,13 @@
         android:id="@+id/longitude"
         android:layout_alignTop="@+id/lng"
         android:layout_toEndOf="@+id/lng"
-        android:textSize="14sp" />
+        android:textSize="12sp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/latitude"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:layout_below="@+id/longitude"
         android:layout_alignStart="@+id/longitude" />
 
