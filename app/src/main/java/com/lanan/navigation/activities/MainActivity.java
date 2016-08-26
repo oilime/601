@@ -1,7 +1,6 @@
 package com.lanan.navigation.activities;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -54,12 +53,13 @@ public class MainActivity extends Activity {
             {112.992792, 28.213875}, {112.993196, 28.213836}, {112.995725, 28.213625},
             {112.99771, 28.213358}, {112.997912, 28.213342}, {112.997822, 28.212547}};
 
+    private boolean isDrawStop;
+//    private boolean isGpsStop = false;
+
     //    private NavigationInfo nInfo;
     private Order myOrder;
     private DataTask dataTask;
-    //    private boolean isGpsStop = false;
-    private boolean isDrawStop;
-    private LinkedList<LocationInfo> showList = new LinkedList<>();
+    private final LinkedList<LocationInfo> showList = new LinkedList<>();
     private OutputStreamWriter out;
     private LocationClient mLocationClient;
 
@@ -73,12 +73,12 @@ public class MainActivity extends Activity {
     private static final int ACCESS_FINE_LOCATION = 7;
     private static final int WRITE_EXTERNAL_STORAGE = 8;
     private static final int READ_PHONE_STATE = 9;
-
-    private static TextToSpeech speech;
     private static final String TAG = "Emilio";
     private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
     private static final DecimalFormat normalFormat = new DecimalFormat("#.00");
     private static final DecimalFormat lngFormat = new DecimalFormat("#.000000");
+
+    private static TextToSpeech speech;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +89,7 @@ public class MainActivity extends Activity {
         try {
             File file = new File(Environment.getExternalStorageDirectory().getPath() + "/gpsdata/info.txt");
             if (!file.exists()) {
-                boolean recv = file.createNewFile();
+                @SuppressWarnings("UnusedAssignment") boolean recv = file.createNewFile();
             }
             out = new OutputStreamWriter(new FileOutputStream(file));
         } catch (Exception e) {
@@ -412,13 +412,12 @@ public class MainActivity extends Activity {
 //    }
 
     private static class VoiceHandler extends Handler {
-        private final WeakReference<Activity> mActivity;
 
+        private final WeakReference<Activity> mActivity;
         public VoiceHandler(Activity activity) {
             mActivity = new WeakReference<>(activity);
         }
 
-        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
         public void handleMessage(Message message) {
             Bundle bundle = message.getData();
@@ -438,7 +437,7 @@ public class MainActivity extends Activity {
     //    public Handler showHandler = new ShowHandler(this);
     private final Handler voiceHandler = new VoiceHandler(this);
 
-    private class VoiceThread extends Thread {
+    private class VoiceThread extends Thread{
         @Override
         public void run() {
             while (!isDrawStop) {

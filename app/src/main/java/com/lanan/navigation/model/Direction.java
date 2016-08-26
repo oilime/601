@@ -9,24 +9,18 @@ public class Direction {
         return dis;
     }
 
-    public void setDis(double dis) {
-        this.dis = dis;
-    }
-
     public double getAngle() {
         return angle;
     }
 
-    public void setAngle(double angle) {
-        this.angle = angle;
-    }
-
+    @SuppressWarnings("unused")
     public Direction(double dis, double angle) {
         super();
         this.dis = dis;
         this.angle = angle;
     }
 
+    @SuppressWarnings("unused")
     public Direction() {
     }
 

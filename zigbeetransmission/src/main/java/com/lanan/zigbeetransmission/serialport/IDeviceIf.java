@@ -30,5 +30,6 @@ interface IDeviceIf {
      * @param len
      * @return
      */
+    @SuppressWarnings("SameReturnValue")
     int Write(byte[] buf, int offset, int len);
 }

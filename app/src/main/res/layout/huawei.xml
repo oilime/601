@@ -31,7 +31,8 @@
         android:layout_alignTop="@+id/path"
         android:text="@string/nw"
         android:textColor="#ffffff"
-        android:textSize="8sp" />
+        android:textSize="8sp"
+        tools:ignore="SmallSp" />
 
     <TextView
         android:id="@+id/ne"
@@ -41,7 +42,8 @@
         android:layout_alignTop="@+id/path"
         android:text="@string/ne"
         android:textColor="#ffffff"
-        android:textSize="8sp" />
+        android:textSize="8sp"
+        tools:ignore="SmallSp" />
 
     <TextView
         android:id="@+id/sw"
@@ -51,7 +53,8 @@
         android:layout_alignStart="@+id/path"
         android:text="@string/sw"
         android:textColor="#ffffff"
-        android:textSize="8sp" />
+        android:textSize="8sp"
+        tools:ignore="SmallSp" />
 
     <TextView
         android:id="@+id/se"
@@ -61,7 +64,8 @@
         android:layout_alignEnd="@+id/path"
         android:text="@string/se"
         android:textColor="#ffffff"
-        android:textSize="8sp" />
+        android:textSize="8sp"
+        tools:ignore="SmallSp" />
 
     <Button
         android:id="@+id/drawpath"
@@ -85,7 +89,8 @@
         android:fadeScrollbars="false"
         android:scrollbars="vertical"
         android:textColor="#ffffff"
-        android:textSize="8sp" />
+        android:textSize="8sp"
+        tools:ignore="SmallSp" />
 
     <Button
         android:id="@+id/recvlocation"

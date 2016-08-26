@@ -16,18 +16,18 @@ import java.text.DecimalFormat;
 public class MyDraw extends View {
 
     private Paint brush = new Paint();      //声明画笔
-    private Paint oriBrush = new Paint();
-    private Paint realBrush = new Paint();
-    private Path path = new Path();
+    private final Paint oriBrush = new Paint();
+    private final Paint realBrush = new Paint();
+    private final Path path = new Path();
 
-    private DecimalFormat decimalFormat = new DecimalFormat("#.000000");
+    private final DecimalFormat decimalFormat = new DecimalFormat("#.000000");
 
-    private double west = 112.986218;
-    private double east = 112.998074;
-    private double north = 28.215455;
-    private double south = 28.205455;
-    private double startX = (west + east) / 2;
-    private double startY = (north + south) / 2;
+    private final double west = 112.986218;
+    private final double east = 112.998074;
+    private final double north = 28.215455;
+    private final double south = 28.205455;
+    private final double startX = (west + east) / 2;
+    private final double startY = (north + south) / 2;
     private int width;
     private int height;
 

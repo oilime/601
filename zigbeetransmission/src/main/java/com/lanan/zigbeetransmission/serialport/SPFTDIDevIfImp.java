@@ -17,9 +17,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+@SuppressWarnings("WeakerAccess")
 public class SPFTDIDevIfImp implements IDeviceIf {
     private final String TAG = SPFTDIDevIfImp.class.getSimpleName();
 
+    @SuppressWarnings("CanBeFinal")
     private static List<USBPid> mSupportedDevices = new ArrayList<>(
             Arrays.asList(new USBPid[]{new USBPid(0x1027, 0x24597), new USBPid(0x1027, 0x24596),
                     new USBPid(0x1027, 0x24593), new USBPid(0x1027, 0x24592), new USBPid(1027, 24577),
@@ -74,6 +76,7 @@ public class SPFTDIDevIfImp implements IDeviceIf {
     private UsbDevice mDevice;
     private UsbDeviceConnection mConnection;
     private UsbEndpoint readEP, writeEP;
+    @SuppressWarnings("CanBeFinal")
     private byte[] mReadBuffer, mWriteBuffer;
 
 
@@ -204,6 +207,7 @@ public class SPFTDIDevIfImp implements IDeviceIf {
         this.mType = DeviceType.TYPE_R;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     private int setBaud(int baudRate) {
         long[] vals = convertBaudrate(baudRate);
         long actualBaudrate = vals[0];
@@ -219,6 +223,7 @@ public class SPFTDIDevIfImp implements IDeviceIf {
         return (int) actualBaudrate;
     }
 
+    @SuppressWarnings("ConstantConditions")
     private long[] convertBaudrate(int baudrate) {
         int divisor = 24000000 / baudrate;
         int bestDivisor = 0;
@@ -279,7 +284,8 @@ public class SPFTDIDevIfImp implements IDeviceIf {
         return new long[]{bestBaud, index, value};
     }
 
-    private boolean setDataCharacteristics(int dataBits, String stopBits, String parity) {
+    @SuppressWarnings({"UnusedReturnValue", "SameReturnValue"})
+    private boolean setDataCharacteristics(@SuppressWarnings("SameParameterValue") int dataBits, String stopBits, String parity) {
         int config = dataBits;
         switch (parity) {
             case SP_OPTION_PNONE:
@@ -322,7 +328,7 @@ public class SPFTDIDevIfImp implements IDeviceIf {
         return true;
     }
 
-    private void setRtsAndDtr(boolean rts, boolean dtr) {
+    private void setRtsAndDtr(@SuppressWarnings("SameParameterValue") boolean rts, @SuppressWarnings("SameParameterValue") boolean dtr) {
         short usb_val;
         if (dtr) {
             usb_val = SIO_SET_DTR_HIGH;

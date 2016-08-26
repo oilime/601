@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class SPCp21xxDevlflImp implements IDeviceIf {
+    @SuppressWarnings("CanBeFinal")
     private static List<USBPid> mSupportedDevices = new ArrayList<>(
             Arrays.asList(new USBPid[]{new USBPid(0x10c4, 0xea60), new USBPid(0x10c4, 0xea70),
                     new USBPid(0x10c4, 0xea71), new USBPid(0x10c4, 0xea80),}));
@@ -43,6 +44,7 @@ public class SPCp21xxDevlflImp implements IDeviceIf {
     private static final int CONTROL_WRITE_DTR = 0x0100;
     private static final int CONTROL_WRITE_RTS = 0x0200;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private UsbDevice mDevice;
     private UsbDeviceConnection mConnection;
     private UsbEndpoint readEP, writeEP;
@@ -98,7 +100,6 @@ public class SPCp21xxDevlflImp implements IDeviceIf {
             }
             setDataCharacteristics(8, stopBits, parity);
 
-            setRtsAndDtr(false, false);
             mDevice = device;
             readEP = this.mDevice.getInterface(0).getEndpoint(0);
             writeEP = this.mDevice.getInterface(0).getEndpoint(1);
@@ -178,7 +179,7 @@ public class SPCp21xxDevlflImp implements IDeviceIf {
 
     }
 
-    private void setDataCharacteristics(int dataBits, String stopBits, String parity) {
+    private void setDataCharacteristics(@SuppressWarnings("SameParameterValue") int dataBits, String stopBits, String parity) {
 
         int configDataBits = 0;
         switch (dataBits) {
@@ -234,7 +235,4 @@ public class SPCp21xxDevlflImp implements IDeviceIf {
         }
     }
 
-    private void setRtsAndDtr(boolean rts, boolean dtr) {
-
-    }
 }

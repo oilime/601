@@ -1,5 +1,7 @@
 package com.lanan.zigbeetransmission.serialport;
 
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -8,8 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import android.util.Log;
-
+@SuppressWarnings("JniMissingFunction")
 public class SerialPort {
 
     static {
@@ -21,6 +22,7 @@ public class SerialPort {
     /*
      * Do not remove or rename the field mFd: it is used by native method close();
      */
+    @SuppressWarnings({"CanBeFinal", "FieldCanBeLocal"})
     private FileDescriptor mFd;
     private FileInputStream mFileInputStream;
     private FileOutputStream mFileOutputStream;

@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class SPCdcAcmDevlflImp implements IDeviceIf {
+    @SuppressWarnings("CanBeFinal")
     private static List<USBPid> mSupportedDevices = new ArrayList<>(
             Arrays.asList(new USBPid[]{new USBPid(0x2341, 0x0001), new USBPid(0x2341, 0x0010),
                     new USBPid(0x2341, 0x003b), new USBPid(0x2341, 0x003f), new USBPid(0x2341, 0x0042),
@@ -34,6 +35,7 @@ public class SPCdcAcmDevlflImp implements IDeviceIf {
 
     private boolean mEnableAsyncReads;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private UsbDevice mDevice;
     private UsbDeviceConnection mConnection;
     private UsbEndpoint readEP, writeEP;
@@ -88,6 +90,7 @@ public class SPCdcAcmDevlflImp implements IDeviceIf {
             }
             String parity = "None";
             if (TextUtils.isEmpty(parity)) {
+                //noinspection UnusedAssignment
                 parity = "None";
             }
             setParameters(baudRate, 8, 1, 0);
@@ -124,7 +127,7 @@ public class SPCdcAcmDevlflImp implements IDeviceIf {
             try {
                 request.initialize(mConnection, readEP);
                 final ByteBuffer buf = ByteBuffer.wrap(dest);
-                final UsbRequest response = mConnection.requestWait();
+                @SuppressWarnings("UnusedAssignment") final UsbRequest response = mConnection.requestWait();
 
                 final int nread = buf.position();
                 if (nread > 0) {
@@ -174,7 +177,7 @@ public class SPCdcAcmDevlflImp implements IDeviceIf {
         mEnableAsyncReads = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1);
     }
 
-    private void setParameters(int baudRate, int dataBits, int stopBits, int parity) {
+    private void setParameters(int baudRate, @SuppressWarnings("SameParameterValue") int dataBits, @SuppressWarnings("SameParameterValue") int stopBits, @SuppressWarnings("SameParameterValue") int parity) {
         byte stopBitsByte;
         switch (stopBits) {
             case 1:
@@ -216,7 +219,7 @@ public class SPCdcAcmDevlflImp implements IDeviceIf {
         mConnection.controlTransfer(USB_RT_ACM, SET_LINE_CODING, 0, 0, msg, msg != null ? msg.length : 0, 5000);
     }
 
-    private void setRtsAndDtr(boolean b, boolean c) {
+    private void setRtsAndDtr(@SuppressWarnings("SameParameterValue") boolean b, @SuppressWarnings("SameParameterValue") boolean c) {
         int value = (b ? 0x2 : 0) | (c ? 0x1 : 0);
         mConnection.controlTransfer(USB_RT_ACM, SET_CONTROL_LINE_STATE, value, 0, null, 0, 5000);
 

@@ -2,7 +2,7 @@ package com.lanan.zigbeetransmission.dataclass;
 
 public class SendPackage {
 
-    private byte[] data;
+    private final byte[] data;
 
     public SendPackage(byte[] dataIn) {
         this.data = dataIn;

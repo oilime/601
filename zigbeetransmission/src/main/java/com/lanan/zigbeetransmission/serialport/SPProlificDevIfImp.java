@@ -17,7 +17,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+@SuppressWarnings("WeakerAccess")
 public class SPProlificDevIfImp implements IDeviceIf {
+    @SuppressWarnings("CanBeFinal")
     private static List<USBPid> mSupportedDevices = new ArrayList<>(Arrays.asList(new USBPid[]{
             new USBPid(0x067b, 0x2303), new USBPid(0x067b, 0x04bb), new USBPid(0x067b, 0x1234),
             new USBPid(0x067b, 0xaaa0), new USBPid(0x067b, 0xaaa2), new USBPid(0x067b, 0x0611),
@@ -190,7 +192,7 @@ public class SPProlificDevIfImp implements IDeviceIf {
         }
     }
 
-    private void setParameters(int baudRate, int dataBits, String stopBits, String parity) {
+    private void setParameters(int baudRate, @SuppressWarnings("SameParameterValue") int dataBits, String stopBits, String parity) {
 
         byte[] lineRequestData = new byte[7];
         lineRequestData[0] = (byte) (baudRate & 0xff);
@@ -241,7 +243,8 @@ public class SPProlificDevIfImp implements IDeviceIf {
         }
     }
 
-    private void setRtsAndDtr(boolean rts, boolean dtr) {
+    @SuppressWarnings("SameParameterValue")
+    private void setRtsAndDtr(@SuppressWarnings("SameParameterValue") boolean rts, boolean dtr) {
         int newControlLinesValue = 0;
         if (rts) {
             newControlLinesValue |= CONTROL_RTS;

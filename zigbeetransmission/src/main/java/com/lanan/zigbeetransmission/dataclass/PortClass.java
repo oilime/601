@@ -16,7 +16,7 @@ public class PortClass {
 
     public enum portType {CDCACM, CP21, FTDI, PROLIFIC, PORT}
 
-    private portType mType;
+    private final portType mType;
     private static SPCdcAcmDevlflImp cdcAcmDevlflImp;
     private static SPCp21xxDevlflImp cp21xxDevlflImp;
     private static SPFTDIDevIfImp spftdiDevIfImp;
@@ -81,7 +81,7 @@ public class PortClass {
         }
     }
 
-    public int read(byte[] dest, int offset, int len) {
+    public int read(byte[] dest, @SuppressWarnings("SameParameterValue") int offset, int len) {
         switch (mType) {
             case CDCACM:
                 return cdcAcmDevlflImp.Read(dest, offset, len);
@@ -102,7 +102,8 @@ public class PortClass {
         }
     }
 
-    public int write(byte[] buf, int offset, int len) {
+    @SuppressWarnings("UnusedReturnValue")
+    public int write(byte[] buf, @SuppressWarnings("SameParameterValue") int offset, int len) {
         switch (mType) {
             case CDCACM:
                 return cdcAcmDevlflImp.Write(buf, offset, len);

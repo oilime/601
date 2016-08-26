@@ -4,9 +4,9 @@ import com.lanan.navigation.model.Gps;
 
 class PositionUtil {
 
-    private static double pi = 3.1415926535897932384626;
-    private static double a = 6378245.0;
-    private static double ee = 0.00669342162296594323;
+    private static final double pi = 3.1415926535897932384626;
+    private static final double a = 6378245.0;
+    private static final double ee = 0.00669342162296594323;
 
     public static Gps gps84_To_Gcj02(double lat, double lon) {
         if (outOfChina(lat, lon)) {
@@ -25,6 +25,7 @@ class PositionUtil {
         return new Gps(mgLat, mgLon);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static Gps gcj_To_Gps84(double lat, double lon) {
         Gps gps = transform(lat, lon);
         double longitude = lon * 2 - gps.getWgLon();
@@ -41,6 +42,7 @@ class PositionUtil {
         return new Gps(bd_lat, bd_lon);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static Gps bd09_To_Gcj02(double bd_lat, double bd_lon) {
         double x = bd_lon - 0.0065, y = bd_lat - 0.006;
         double z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * pi);
@@ -56,6 +58,7 @@ class PositionUtil {
         return PositionUtil.gcj_To_Gps84(gcj02.getWgLat(), gcj02.getWgLon());
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static boolean outOfChina(double lat, double lon) {
         if (lon < 72.004 || lon > 137.8347)
             return true;
@@ -64,6 +67,7 @@ class PositionUtil {
         return false;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static Gps transform(double lat, double lon) {
         if (outOfChina(lat, lon)) {
             return new Gps(lat, lon);
@@ -81,6 +85,7 @@ class PositionUtil {
         return new Gps(mgLat, mgLon);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static double transformLat(double x, double y) {
         double ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y
                 + 0.2 * Math.sqrt(Math.abs(x));
@@ -90,6 +95,7 @@ class PositionUtil {
         return ret;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public static double transformLon(double x, double y) {
         double ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1
                 * Math.sqrt(Math.abs(x));

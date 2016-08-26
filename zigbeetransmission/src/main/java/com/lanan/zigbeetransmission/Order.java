@@ -13,20 +13,21 @@ import java.util.LinkedList;
 
 public class Order {
 
-    private byte[] head = new byte[]{(byte) 0xfe, (byte) 0xdd, (byte) 0xdf};    //数据包头
-    private byte[] oriLen = new byte[]{0x1a};                                     //a-->b数据包长度:26
-    private byte[] naviLen = new byte[]{0x23};                                     //b-->c数据包长度:35
-    private byte[] userId = new byte[]{0x01};                                     //用户id
-    private byte[] startPos = new byte[]{0x24};                                     //起始位
-    private byte[] lngSig = new byte[]{0x20};                                     //标志位，后方数据为经度
-    private byte[] latSig = new byte[]{0x2d};                                     //标志位，后方数据为纬度
-    private byte[] packageC = new byte[]{0x00};                                     //标志位，后方还有数据包
-    private byte[] packageO = new byte[]{0x01};                                     //标志位，最后一个数据包
-    private byte[] distanceSig = new byte[]{0x28};                                     //标志位，后方数据为距离
-    private byte[] angleSig = new byte[]{0x30};                                     //标志位，后方数据为角度
-    private byte[] posSig = new byte[]{0x43};                                     //标志位，后方数据为路径点号
-    private byte[] arriveSig = new byte[]{0x1a};                                     //标志位，后方数据为是否达到
-    private byte[] yawSig = new byte[]{0x11};                                     //标志位，后方数据为是否偏航
+    private final byte[] head = new byte[]{(byte) 0xfe, (byte) 0xdd, (byte) 0xdf};    //数据包头
+    @SuppressWarnings("FieldCanBeLocal")
+    private final byte[] oriLen = new byte[]{0x1a};                                     //a-->b数据包长度:26
+    private final byte[] naviLen = new byte[]{0x23};                                     //b-->c数据包长度:35
+    private final byte[] userId = new byte[]{0x01};                                     //用户id
+    private final byte[] startPos = new byte[]{0x24};                                     //起始位
+    private final byte[] lngSig = new byte[]{0x20};                                     //标志位，后方数据为经度
+    private final byte[] latSig = new byte[]{0x2d};                                     //标志位，后方数据为纬度
+    private final byte[] packageC = new byte[]{0x00};                                     //标志位，后方还有数据包
+    private final byte[] packageO = new byte[]{0x01};                                     //标志位，最后一个数据包
+    private final byte[] distanceSig = new byte[]{0x28};                                     //标志位，后方数据为距离
+    private final byte[] angleSig = new byte[]{0x30};                                     //标志位，后方数据为角度
+    private final byte[] posSig = new byte[]{0x43};                                     //标志位，后方数据为路径点号
+    private final byte[] arriveSig = new byte[]{0x1a};                                     //标志位，后方数据为是否达到
+    private final byte[] yawSig = new byte[]{0x11};                                     //标志位，后方数据为是否偏航
 
     private ArrayList<SendPackage> sendList = new ArrayList<>();
     private ArrayList<SendPackage> recvList;
@@ -39,10 +40,9 @@ public class Order {
     public enum Type {SET_ORIGIN, UNPACK_ORIGIN, SET_NAVIGATION, UNPACK_NAVIGATION}
 
     private Type orderType;
-    private boolean SUCCESS = true;
-    private boolean FAIL = false;
     private boolean isReadFinished = false;
-    private boolean isWriteFinished = false;
+    @SuppressWarnings("FieldCanBeLocal")
+    private final boolean isWriteFinished = false;
 
     private byte[] doBuffer = new byte[1024];
     private int doCount = 0;
@@ -126,6 +126,7 @@ public class Order {
     }
 
     public boolean setPackage() {
+        boolean FAIL = false;
         switch (orderType) {
             case SET_NAVIGATION:
                 int sendLen = sendList.size();
@@ -182,6 +183,7 @@ public class Order {
                             return FAIL;
                         }
                     }
+                    boolean SUCCESS = true;
                     return SUCCESS;
                 }
         }
@@ -580,6 +582,7 @@ public class Order {
         return sb.toString();
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     private byte[] bufferSet(byte[] bytes) {
         for (int i = 0; i < bytes.length; i++) {
             bytes[i] = 0;

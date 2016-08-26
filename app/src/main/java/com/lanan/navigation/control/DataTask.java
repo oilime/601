@@ -21,10 +21,6 @@ public class DataTask extends Thread {
 
     private NavigationInfo info;
 
-    public ArrayList<LocationInfo> getDestination() {
-        return destination;
-    }
-
     public void setDestination(ArrayList<LocationInfo> destination) {
         this.destination = destination;
     }
@@ -33,7 +29,7 @@ public class DataTask extends Thread {
         return interrupt;
     }
 
-    public void setInterrupt(boolean interrupt) {
+    public void setInterrupt(@SuppressWarnings("SameParameterValue") boolean interrupt) {
         this.interrupt = true;
     }
 
