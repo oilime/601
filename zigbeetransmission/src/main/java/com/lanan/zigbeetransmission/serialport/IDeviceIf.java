@@ -2,8 +2,8 @@ package com.lanan.zigbeetransmission.serialport;
 
 import android.content.Context;
 
-public interface IDeviceIf {
-	/**
+interface IDeviceIf {
+    /**
      * 打开设备
      */
     void Open(Context context);
@@ -12,15 +12,19 @@ public interface IDeviceIf {
      * 关闭设备
      */
     void Close();
+
     /**
      * 读数据
+     *
      * @param buf
      * @param offset
      * @param len
      */
     int Read(byte[] buf, int offset, int len);
+
     /**
      * 写数据
+     *
      * @param buf
      * @param offset
      * @param len

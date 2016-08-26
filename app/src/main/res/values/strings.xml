@@ -9,11 +9,8 @@
     <string name="draw_path">开始导航</string>
     <string name="send_location">发送离散路径点</string>
     <string name="recv_location">接收离散路径点</string>
-    <string name="send_navigation">发送导航数据</string>
-    <string name="recv_navigation">接收导航数据</string>
     <string name="show_information">信息显示</string>
     <string name="close_port">关闭端口</string>
-    <string name="get_gps">获取gps信息</string>
     <string name="longitude">当前经度：</string>
     <string name="latitude">当前纬度：</string>
 

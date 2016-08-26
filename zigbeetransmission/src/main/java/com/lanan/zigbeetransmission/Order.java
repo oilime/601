@@ -13,20 +13,20 @@ import java.util.LinkedList;
 
 public class Order {
 
-    byte[] head         = new byte[]{(byte) 0xfe, (byte) 0xdd, (byte) 0xdf};    //数据包头
-    byte[] oriLen       = new byte[]{0x1a};                                     //a-->b数据包长度:26
-    byte[] naviLen      = new byte[]{0x23};                                     //b-->c数据包长度:35
-    byte[] userId       = new byte[]{0x01};                                     //用户id
-    byte[] startPos     = new byte[]{0x24};                                     //起始位
-    byte[] lngSig       = new byte[]{0x20};                                     //标志位，后方数据为经度
-    byte[] latSig       = new byte[]{0x2d};                                     //标志位，后方数据为纬度
-    byte[] packageC     = new byte[]{0x00};                                     //标志位，后方还有数据包
-    byte[] packageO     = new byte[]{0x01};                                     //标志位，最后一个数据包
-    byte[] distanceSig  = new byte[]{0x28};                                     //标志位，后方数据为距离
-    byte[] angleSig     = new byte[]{0x30};                                     //标志位，后方数据为角度
-    byte[] posSig       = new byte[]{0x43};                                     //标志位，后方数据为路径点号
-    byte[] arriveSig    = new byte[]{0x1a};                                     //标志位，后方数据为是否达到
-    byte[] yawSig       = new byte[]{0x11};                                     //标志位，后方数据为是否偏航
+    private byte[] head = new byte[]{(byte) 0xfe, (byte) 0xdd, (byte) 0xdf};    //数据包头
+    private byte[] oriLen = new byte[]{0x1a};                                     //a-->b数据包长度:26
+    private byte[] naviLen = new byte[]{0x23};                                     //b-->c数据包长度:35
+    private byte[] userId = new byte[]{0x01};                                     //用户id
+    private byte[] startPos = new byte[]{0x24};                                     //起始位
+    private byte[] lngSig = new byte[]{0x20};                                     //标志位，后方数据为经度
+    private byte[] latSig = new byte[]{0x2d};                                     //标志位，后方数据为纬度
+    private byte[] packageC = new byte[]{0x00};                                     //标志位，后方还有数据包
+    private byte[] packageO = new byte[]{0x01};                                     //标志位，最后一个数据包
+    private byte[] distanceSig = new byte[]{0x28};                                     //标志位，后方数据为距离
+    private byte[] angleSig = new byte[]{0x30};                                     //标志位，后方数据为角度
+    private byte[] posSig = new byte[]{0x43};                                     //标志位，后方数据为路径点号
+    private byte[] arriveSig = new byte[]{0x1a};                                     //标志位，后方数据为是否达到
+    private byte[] yawSig = new byte[]{0x11};                                     //标志位，后方数据为是否偏航
 
     private ArrayList<SendPackage> sendList = new ArrayList<>();
     private ArrayList<SendPackage> recvList;
@@ -37,11 +37,12 @@ public class Order {
     private int count = 0;
 
     public enum Type {SET_ORIGIN, UNPACK_ORIGIN, SET_NAVIGATION, UNPACK_NAVIGATION}
+
     private Type orderType;
-    boolean SUCCESS = true;
-    boolean FAIL = false;
-    boolean isReadFinished = false;
-    boolean isWriteFinished = false;
+    private boolean SUCCESS = true;
+    private boolean FAIL = false;
+    private boolean isReadFinished = false;
+    private boolean isWriteFinished = false;
 
     private byte[] doBuffer = new byte[1024];
     private int doCount = 0;
@@ -57,7 +58,7 @@ public class Order {
 
     public Order(double[][] data) {
         locationList = new ArrayList<>();
-        for (double[] p: data) {
+        for (double[] p : data) {
             LocationInfo info = new LocationInfo(p[0], p[1]);
             locationList.add(info);
         }
@@ -66,7 +67,7 @@ public class Order {
     public Order(double[][] data, PortClass port) {
         this.port = port;
         locationList = new ArrayList<>();
-        for (double[] p: data) {
+        for (double[] p : data) {
             LocationInfo info = new LocationInfo(p[0], p[1]);
             locationList.add(info);
         }
@@ -93,7 +94,7 @@ public class Order {
 
                 if (i == locationList.size() - 1) {
                     System.arraycopy(packageO, 0, packageData, 24, 1);
-                }else {
+                } else {
                     System.arraycopy(packageC, 0, packageData, 24, 1);
                 }
 
@@ -150,14 +151,14 @@ public class Order {
                             byte[] aStatus;
                             if (info.isArrived()) {
                                 aStatus = new byte[]{0x01};
-                            }else {
+                            } else {
                                 aStatus = new byte[]{0x00};
                             }
 
                             byte[] yStatus;
                             if (info.isYawed()) {
                                 yStatus = new byte[]{0x01};
-                            }else {
+                            } else {
                                 yStatus = new byte[]{0x00};
                             }
 
@@ -177,7 +178,7 @@ public class Order {
                             System.arraycopy(crc, 0, packageData, 34, 1);
 
                             sendList.add(new SendPackage(packageData));
-                        }catch (Exception e) {
+                        } catch (Exception e) {
                             return FAIL;
                         }
                     }
@@ -187,7 +188,7 @@ public class Order {
         return FAIL;
     }
 
-    public void getPackage(){
+    public void getPackage() {
         switch (orderType) {
             case UNPACK_ORIGIN:
                 for (int i = 0; i < recvList.size(); i++) {
@@ -200,7 +201,7 @@ public class Order {
 
                         byte[] lngCheck = new byte[1];
                         System.arraycopy(packageData, 6, lngCheck, 0, 1);
-                        if (Arrays.equals(lngCheck, lngSig)){
+                        if (Arrays.equals(lngCheck, lngSig)) {
                             byte[] recvLng = new byte[8];
                             System.arraycopy(packageData, 7, recvLng, 0, 8);
                             point.setLng(bytes2Double(recvLng));
@@ -210,7 +211,7 @@ public class Order {
 
                         byte[] latCheck = new byte[1];
                         System.arraycopy(packageData, 15, latCheck, 0, 1);
-                        if (Arrays.equals(latCheck, latSig)){
+                        if (Arrays.equals(latCheck, latSig)) {
                             byte[] recvLat = new byte[8];
                             System.arraycopy(packageData, 16, recvLat, 0, 8);
                             point.setLat(bytes2Double(recvLat));
@@ -227,7 +228,7 @@ public class Order {
             case UNPACK_NAVIGATION:
                 int recvLen = recvList.size();
                 int rnavLen = recvNavigationList.size();
-                if (rnavLen >= recvLen){
+                if (rnavLen >= recvLen) {
                     break;
                 } else {
                     for (int i = rnavLen; i < recvLen; i++) {
@@ -240,7 +241,7 @@ public class Order {
 
                             byte[] disCheck = new byte[1];
                             System.arraycopy(packageData, 6, disCheck, 0, 1);
-                            if (Arrays.equals(disCheck, distanceSig)){
+                            if (Arrays.equals(disCheck, distanceSig)) {
                                 byte[] recvDis = new byte[8];
                                 System.arraycopy(packageData, 7, recvDis, 0, 8);
                                 nPoint.setDistance(bytes2Double(recvDis));
@@ -250,7 +251,7 @@ public class Order {
 
                             byte[] angleCheck = new byte[1];
                             System.arraycopy(packageData, 15, angleCheck, 0, 1);
-                            if (Arrays.equals(angleCheck, angleSig)){
+                            if (Arrays.equals(angleCheck, angleSig)) {
                                 byte[] recvAngle = new byte[8];
                                 System.arraycopy(packageData, 16, recvAngle, 0, 8);
                                 nPoint.setAngle(bytes2Double(recvAngle));
@@ -260,7 +261,7 @@ public class Order {
 
                             byte[] posCheck = new byte[1];
                             System.arraycopy(packageData, 24, posCheck, 0, 1);
-                            if (Arrays.equals(posCheck, posSig)){
+                            if (Arrays.equals(posCheck, posSig)) {
                                 byte[] recvPos = new byte[4];
                                 System.arraycopy(packageData, 25, recvPos, 0, 4);
                                 nPoint.setPos(bytes2Int(recvPos));
@@ -273,7 +274,7 @@ public class Order {
                                 System.arraycopy(packageData, 30, recvAS, 0, 1);
                                 if (Arrays.equals(recvAS, new byte[]{0x01})) {
                                     nPoint.setArriveStatus(true);
-                                }else if (Arrays.equals(recvAS, new byte[]{0x00})){
+                                } else if (Arrays.equals(recvAS, new byte[]{0x00})) {
                                     nPoint.setArriveStatus(false);
                                 }
                             }
@@ -285,7 +286,7 @@ public class Order {
                                 System.arraycopy(packageData, 32, recvYS, 0, 1);
                                 if (Arrays.equals(recvYS, new byte[]{0x01})) {
                                     nPoint.setYawStatus(true);
-                                }else if (Arrays.equals(recvYS, new byte[]{0x00})){
+                                } else if (Arrays.equals(recvYS, new byte[]{0x00})) {
                                     nPoint.setYawStatus(false);
                                 }
                             }
@@ -301,10 +302,10 @@ public class Order {
 
     private class receiveThread extends Thread {
         @Override
-        public void run(){
+        public void run() {
             try {
                 bufferSet(doBuffer);
-                while (!isInterrupted()){
+                while (!isInterrupted()) {
                     int len;
                     byte[] readBuffer = new byte[1024];
                     bufferSet(readBuffer);
@@ -314,7 +315,7 @@ public class Order {
                         Thread.sleep(500);
                     }
                 }
-            }catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -322,16 +323,16 @@ public class Order {
 
     private class sendThread extends Thread {
         @Override
-        public void run(){
+        public void run() {
             while (!isInterrupted()) {
                 if (!sendList.isEmpty() && count < sendList.size()) {
-                    for (int i = count; i < sendList.size();i++) {
+                    for (int i = count; i < sendList.size(); i++) {
                         byte[] navigationPackage = sendList.get(i).getPackageData();
                         port.write(navigationPackage, 0, navigationPackage.length);
                         count++;
                         try {
                             Thread.sleep(500);
-                        }catch (Exception e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                         Log.d("Emilio", "package " + count + ": " + parseByte2HexStr(navigationPackage));
@@ -343,16 +344,16 @@ public class Order {
 
     private class handleThread extends Thread {
         @Override
-        public void run(){
+        public void run() {
             try {
                 while (!isInterrupted()) {
                     byte[] p = getDoBuffer(35);
-                    if (p != null){
+                    if (p != null) {
                         Log.d("Emilio", "get: " + parseByte2HexStr(p));
                         recvList.add(new SendPackage(p));
                     }
                 }
-            }catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -360,21 +361,21 @@ public class Order {
 
     private class handleOriThread extends Thread {
         @Override
-        public void run(){
+        public void run() {
             try {
                 while (!isInterrupted()) {
                     byte[] p = getDoBuffer(26);
-                    if (p != null){
+                    if (p != null) {
                         Log.d("Emilio", "get: " + parseByte2HexStr(p));
                         recvList.add(new SendPackage(p));
-                        if (p[24] == packageO[0]){
+                        if (p[24] == packageO[0]) {
                             receive.interrupt();
                             break;
                         }
                     }
                 }
                 isReadFinished = true;
-            }catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -400,12 +401,12 @@ public class Order {
         stopAllThread();
         switch (orderType) {
             case SET_ORIGIN:
-                for (SendPackage p: sendList) {
+                for (SendPackage p : sendList) {
                     byte[] writeBuffer = p.getPackageData();
                     port.write(writeBuffer, 0, writeBuffer.length);
                     try {
                         Thread.sleep(500);
-                    }catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                     Log.d("Emilio", "write:" + parseByte2HexStr(writeBuffer));
@@ -423,7 +424,7 @@ public class Order {
     }
 
     public NavigationInfo getNavigationInfo() {
-        if (!recvNavigationList.isEmpty()){
+        if (!recvNavigationList.isEmpty()) {
             NavigationInfo info = recvNavigationList.getLast();
             recvNavigationList.clear();
             recvList.clear();
@@ -432,7 +433,7 @@ public class Order {
             return null;
     }
 
-    public PortClass getPort () {
+    public PortClass getPort() {
         return this.port;
     }
 
@@ -441,7 +442,7 @@ public class Order {
         this.orderType = type;
     }
 
-    public void stopAllThread() {
+    private void stopAllThread() {
         if (send != null && send.isAlive()) {
             Log.d("Emilio", "send interrupt");
             send.interrupt();
@@ -475,11 +476,11 @@ public class Order {
         else {
             byte[] check = new byte[len];
             System.arraycopy(doBuffer, 0, check, 0, len);
-            if (getCrc(check, len - 1) == check[len - 1]){
+            if (getCrc(check, len - 1) == check[len - 1]) {
                 byte[] leave = new byte[doCount - len];
                 System.arraycopy(doBuffer, 35, leave, 0, leave.length);
                 bufferSet(doBuffer);
-                System.arraycopy(leave, 0, doBuffer, 0 , leave.length);
+                System.arraycopy(leave, 0, doBuffer, 0, leave.length);
                 doCount -= len;
                 return check;
             }
@@ -487,7 +488,7 @@ public class Order {
         return null;
     }
 
-    public void stop(){
+    public void stop() {
         stopAllThread();
         this.port.close();
         doBuffer = null;
@@ -559,9 +560,9 @@ public class Order {
         return b;
     }
 
-    private byte getCrc(byte[] data,int len) {
+    private byte getCrc(byte[] data, int len) {
         byte crc = 0;
-        for(int i = 0; i < len; i++) {
+        for (int i = 0; i < len; i++) {
             crc ^= data[i];
         }
         return crc;
@@ -569,7 +570,7 @@ public class Order {
 
     private String parseByte2HexStr(byte[] buf) {
         StringBuilder sb = new StringBuilder();
-        for (byte i: buf) {
+        for (byte i : buf) {
             String hex = Integer.toHexString(i & 0xFF);
             if (hex.length() == 1) {
                 hex = '0' + hex;
@@ -580,7 +581,7 @@ public class Order {
     }
 
     private byte[] bufferSet(byte[] bytes) {
-        for (int i = 0; i < bytes.length; i++){
+        for (int i = 0; i < bytes.length; i++) {
             bytes[i] = 0;
         }
         return bytes;

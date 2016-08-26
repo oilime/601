@@ -74,7 +74,7 @@ public class PortClass {
                     serialPort = new SerialPort(portFile, baudRate, flags);
                     in = serialPort.getInputStream();
                     out = serialPort.getOutputStream();
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 break;
@@ -94,7 +94,7 @@ public class PortClass {
             case PORT:
                 try {
                     return in.read(dest, offset, len);
-                }catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             default:
@@ -116,7 +116,7 @@ public class PortClass {
                 try {
                     out.write(buf, offset, len);
                     out.flush();
-                }catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     return -1;
                 }

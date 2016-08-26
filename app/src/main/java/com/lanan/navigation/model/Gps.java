@@ -14,14 +14,15 @@ public class Gps {
         return wgLat;
     }
 
-    public void setWgLat(double wgLat) {
+    private void setWgLat(double wgLat) {
         this.wgLat = wgLat;
     }
 
     public double getWgLon() {
         return wgLon;
     }
-    public void setWgLon(double wgLon) {
+
+    private void setWgLon(double wgLon) {
         this.wgLon = wgLon;
     }
 

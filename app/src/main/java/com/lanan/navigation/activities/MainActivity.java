@@ -1,6 +1,7 @@
 package com.lanan.navigation.activities;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -49,14 +50,14 @@ public class MainActivity extends Activity {
     private static TextView longitude;
     private static TextView latitude;
 
-    private double[][] data =   {{112.992146,28.210455}, {112.992511,28.210442},
-            {112.992792,28.213875}, {112.993196,28.213836}, {112.995725,28.213625},
-            {112.99771,28.213358},  {112.997912,28.213342}, {112.997822,28.212547}};
+    private final double[][] data = {{112.992146, 28.210455}, {112.992511, 28.210442},
+            {112.992792, 28.213875}, {112.993196, 28.213836}, {112.995725, 28.213625},
+            {112.99771, 28.213358}, {112.997912, 28.213342}, {112.997822, 28.212547}};
 
-//    private NavigationInfo nInfo;
+    //    private NavigationInfo nInfo;
     private Order myOrder;
     private DataTask dataTask;
-//    private boolean isGpsStop = false;
+    //    private boolean isGpsStop = false;
     private boolean isDrawStop;
     private LinkedList<LocationInfo> showList = new LinkedList<>();
     private OutputStreamWriter out;
@@ -73,13 +74,11 @@ public class MainActivity extends Activity {
     private static final int WRITE_EXTERNAL_STORAGE = 8;
     private static final int READ_PHONE_STATE = 9;
 
-    private static final String TAG = "Emilio";
     private static TextToSpeech speech;
-    private static SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
-    private static DecimalFormat normalFormat = new DecimalFormat("#.00");
-    private static DecimalFormat lngFormat = new DecimalFormat("#.000000");
-
-    private static int SDK_VERSION = Build.VERSION.SDK_INT;
+    private static final String TAG = "Emilio";
+    private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
+    private static final DecimalFormat normalFormat = new DecimalFormat("#.00");
+    private static final DecimalFormat lngFormat = new DecimalFormat("#.000000");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,72 +92,9 @@ public class MainActivity extends Activity {
                 boolean recv = file.createNewFile();
             }
             out = new OutputStreamWriter(new FileOutputStream(file));
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
-        isDrawStop = false;
-
-        mLocationClient = new LocationClient(this);
-        LocationClientOption mOption = new LocationClientOption();
-        mOption.setOpenGps(true);
-        mOption.setCoorType("bd09ll");
-        mOption.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
-        mOption.setScanSpan(1000);
-
-        mLocationClient.setLocOption(mOption);
-        mLocationClient.registerLocationListener(new BDLocationListener() {
-            @Override
-            public void onReceiveLocation(BDLocation bdLocation) {
-                if(bdLocation == null){
-                    return;
-                }
-
-                if (bdLocation.getLocType() != 61 && bdLocation.getLocType() != 161) {
-                    return;
-                }
-
-                LocationInfo info = new LocationInfo(bdLocation.getLongitude(), bdLocation.getLatitude());
-                String curDate = timeFormat.format(System.currentTimeMillis());
-                String data = "时间：" + curDate + " 经度：" + info.getLng() + " 纬度：" + info.getLat() + "\n";
-
-                try {
-                    out.write(data);
-                    out.flush();
-                }catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                if (!showList.isEmpty()) {
-                    if (showList.size() > 4) {
-                        showList.pollFirst();
-                    }
-                    double lngCount = info.getLng();
-                    double latCount = info.getLat();
-                    for (LocationInfo s: showList) {
-                        lngCount += s.getLng();
-                        latCount += s.getLat();
-                    }
-                    double calLng = lngCount / (showList.size() + 1);
-                    double calLat = latCount / (showList.size() + 1);
-                    LocationInfo s = new LocationInfo(calLng, calLat);
-                    showList.addLast(s);
-                }else {
-                    showList.addLast(info);
-                }
-
-                Message message = new Message();
-                message.what = LNG_LAT;
-                Bundle bundle = new Bundle();
-                bundle.putDouble("longitude", showList.getLast().getLng());
-                bundle.putDouble("latitude", showList.getLast().getLat());
-                message.setData(bundle);
-                mHandler.sendMessage(message);
-                dataTask.setmLocation(showList.getLast());
-            }
-        });
-        mLocationClient.start();
-        mLocationClient.requestLocation();
 
         myDraw = (MyDraw) this.findViewById(R.id.path);
         longitude = (TextView) this.findViewById(R.id.longitude);
@@ -170,6 +106,8 @@ public class MainActivity extends Activity {
         Button recvLocation = (Button) this.findViewById(R.id.recvlocation);
         Button drawPath = (Button) this.findViewById(R.id.drawpath);
         Button closePort = (Button) this.findViewById(R.id.closeport);
+
+        baiduLbsSet();
 
         sendLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -238,7 +176,7 @@ public class MainActivity extends Activity {
                 myOrder = new Order(data);
 
                 ArrayList<LocationInfo> locationInfos = myOrder.getLocationDataList();
-                for (LocationInfo infos: locationInfos) {
+                for (LocationInfo infos : locationInfos) {
                     if (infos.equals(locationInfos.get(0)))
                         myDraw.drawOrigin(infos);
                     else
@@ -258,7 +196,7 @@ public class MainActivity extends Activity {
                         while (!isDrawStop) {
                             NavigationInfo info = dataTask.getInfo();
                             if (info != null) {
-                                if (info.isArrived()){
+                                if (info.isArrived()) {
                                     dataTask.setInterrupt(true);
                                     isDrawStop = true;
                                     break;
@@ -274,7 +212,7 @@ public class MainActivity extends Activity {
                                 mHandler.sendMessage(message);
                                 try {
                                     Thread.sleep(2000);
-                                }catch (Exception e) {
+                                } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -287,7 +225,7 @@ public class MainActivity extends Activity {
         closePort.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (myOrder != null){
+                if (myOrder != null) {
                     myOrder = null;
                 }
 //                isGpsStop = true;
@@ -338,16 +276,72 @@ public class MainActivity extends Activity {
 //        return sb.toString();
 //    }
 
-    private static void refreshScreen(String msg){
-        screen.append(msg);
-        int offset = screen.getLineCount()*screen.getLineHeight();
-        if(offset > screen.getHeight()){
-            screen.scrollTo(0, offset - screen.getHeight());
-        }
+    private void baiduLbsSet() {
+        mLocationClient = new LocationClient(this);
+        LocationClientOption mOption = new LocationClientOption();
+        mOption.setOpenGps(true);
+        mOption.setCoorType("bd09ll");
+        mOption.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
+        mOption.setScanSpan(1000);
+
+        mLocationClient.setLocOption(mOption);
+        mLocationClient.registerLocationListener(new BDLocationListener() {
+            @Override
+            public void onReceiveLocation(BDLocation bdLocation) {
+                if (bdLocation == null) {
+                    return;
+                }
+
+                if (bdLocation.getLocType() != 61 && bdLocation.getLocType() != 161) {
+                    return;
+                }
+
+                LocationInfo info = new LocationInfo(bdLocation.getLongitude(), bdLocation.getLatitude());
+                String curDate = timeFormat.format(System.currentTimeMillis());
+                String data = "时间：" + curDate + " 经度：" + info.getLng() + " 纬度：" + info.getLat() + "\n";
+
+                try {
+                    out.write(data);
+                    out.flush();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                if (!showList.isEmpty()) {
+                    if (showList.size() > 4) {
+                        showList.pollFirst();
+                    }
+                    double lngCount = info.getLng();
+                    double latCount = info.getLat();
+                    for (LocationInfo s : showList) {
+                        lngCount += s.getLng();
+                        latCount += s.getLat();
+                    }
+                    double calLng = lngCount / (showList.size() + 1);
+                    double calLat = latCount / (showList.size() + 1);
+                    LocationInfo s = new LocationInfo(calLng, calLat);
+                    showList.addLast(s);
+                } else {
+                    showList.addLast(info);
+                }
+
+                Message message = new Message();
+                message.what = LNG_LAT;
+                Bundle bundle = new Bundle();
+                bundle.putDouble("longitude", showList.getLast().getLng());
+                bundle.putDouble("latitude", showList.getLast().getLat());
+                message.setData(bundle);
+                mHandler.sendMessage(message);
+                dataTask.setmLocation(showList.getLast());
+            }
+        });
+        mLocationClient.start();
+        mLocationClient.requestLocation();
     }
 
     private static class MyHandler extends Handler {
         private final WeakReference<Activity> mActivity;
+
         public MyHandler(Activity activity) {
             mActivity = new WeakReference<>(activity);
         }
@@ -378,7 +372,7 @@ public class MainActivity extends Activity {
                     if (pos > curPos) {
                         int a = Double.valueOf(dis).intValue();
                         int b = Double.valueOf(angle).intValue();
-                        if (SDK_VERSION >= Build.VERSION_CODES.LOLLIPOP) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             speech.speak("已到达第" + (pos - 1) + "路径点", TextToSpeech.QUEUE_FLUSH, null, null);
                             speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null, null);
                             speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null, null);
@@ -387,7 +381,7 @@ public class MainActivity extends Activity {
                     }
                     if (yaw) {
                         refreshScreen("偏航！\n偏航！偏航！\n偏航！偏航！偏航！\n");
-                        if (SDK_VERSION >= Build.VERSION_CODES.LOLLIPOP) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             speech.speak("偏航", TextToSpeech.QUEUE_FLUSH, null, null);
                         }
                     }
@@ -419,10 +413,12 @@ public class MainActivity extends Activity {
 
     private static class VoiceHandler extends Handler {
         private final WeakReference<Activity> mActivity;
+
         public VoiceHandler(Activity activity) {
             mActivity = new WeakReference<>(activity);
         }
 
+        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
         public void handleMessage(Message message) {
             Bundle bundle = message.getData();
@@ -431,20 +427,20 @@ public class MainActivity extends Activity {
             double angle = bundle.getDouble("angle");
             int b = Double.valueOf(angle).intValue();
             int pos = bundle.getInt("pos");
-            if (SDK_VERSION >= Build.VERSION_CODES.LOLLIPOP){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null, null);
                 speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null, null);
             }
         }
     }
 
-    private Handler mHandler = new MyHandler(this);
-//    public Handler showHandler = new ShowHandler(this);
-    private Handler voiceHandler = new VoiceHandler(this);
+    private final Handler mHandler = new MyHandler(this);
+    //    public Handler showHandler = new ShowHandler(this);
+    private final Handler voiceHandler = new VoiceHandler(this);
 
     private class VoiceThread extends Thread {
         @Override
-        public void run(){
+        public void run() {
             while (!isDrawStop) {
                 NavigationInfo info = dataTask.getInfo();
                 if (info != null) {
@@ -457,7 +453,7 @@ public class MainActivity extends Activity {
                     voiceHandler.sendMessage(message);
                     try {
                         Thread.sleep(60000);
-                    }catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -465,18 +461,26 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void PermissionCheck(){
+    private static void refreshScreen(String msg) {
+        screen.append(msg);
+        int offset = screen.getLineCount() * screen.getLineHeight();
+        if (offset > screen.getHeight()) {
+            screen.scrollTo(0, offset - screen.getHeight());
+        }
+    }
+
+    private void PermissionCheck() {
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "无gps权限");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     ACCESS_FINE_LOCATION);
-        }else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        } else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "无写文件权限");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     WRITE_EXTERNAL_STORAGE);
-        }else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE)
+        } else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE)
                 != PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "无读取手机状态权限");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE},
@@ -513,7 +517,7 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onDestroy() throws SecurityException{
+    protected void onDestroy() throws SecurityException {
         super.onDestroy();
         isDrawStop = true;
         if (myOrder != null) {
@@ -523,11 +527,11 @@ public class MainActivity extends Activity {
         if (out != null) {
             try {
                 out.close();
-            }catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        if(mLocationClient != null && mLocationClient.isStarted()) {
+        if (mLocationClient != null && mLocationClient.isStarted()) {
             mLocationClient.stop();
             mLocationClient = null;
         }

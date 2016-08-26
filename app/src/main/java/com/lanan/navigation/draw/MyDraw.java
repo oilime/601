@@ -37,8 +37,8 @@ public class MyDraw extends View {
         super(context);
     }
 
-    public MyDraw(Context context, AttributeSet attrs){
-        super(context,attrs);
+    public MyDraw(Context context, AttributeSet attrs) {
+        super(context, attrs);
         this.setBackgroundColor(Color.GRAY);
 
         oriBrush.setAntiAlias(true);
@@ -56,7 +56,7 @@ public class MyDraw extends View {
         this.brush = oriBrush;
     }
 
-    public MyDraw(Context context, AttributeSet attrs, int defStyle){
+    public MyDraw(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
 
@@ -65,9 +65,9 @@ public class MyDraw extends View {
         canvas.drawPath(path, brush);
     }
 
-    public void drawNew (LocationInfo point) {
-        float x = (float) (((point.getLng() - startX)/(east - west)) * width + width/2);
-        float y = (float) (((startY - point.getLat())/(north - south)) * height + height/2);
+    public void drawNew(LocationInfo point) {
+        float x = (float) (((point.getLng() - startX) / (east - west)) * width + width / 2);
+        float y = (float) (((startY - point.getLat()) / (north - south)) * height + height / 2);
 
         path.lineTo(x, y);
         path.addCircle(x, y, 1, Path.Direction.CW);
@@ -80,8 +80,8 @@ public class MyDraw extends View {
 
         Log.d("Emilio", "height: " + height + " width: " + width);
 
-        float x = (float) (((point.getLng() - startX)/(east - west)) * width + width/2);
-        float y = (float) (((startY - point.getLat())/(north - south)) * height + height/2);
+        float x = (float) (((point.getLng() - startX) / (east - west)) * width + width / 2);
+        float y = (float) (((startY - point.getLat()) / (north - south)) * height + height / 2);
 
         path.moveTo(x, y);
         path.addCircle(x, y, 1, Path.Direction.CW);
@@ -105,7 +105,7 @@ public class MyDraw extends View {
     public void setBrush(boolean paint) {
         if (paint) {
             this.brush = oriBrush;
-        }else {
+        } else {
             this.brush = realBrush;
         }
     }

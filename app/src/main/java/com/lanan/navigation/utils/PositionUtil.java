@@ -2,11 +2,11 @@ package com.lanan.navigation.utils;
 
 import com.lanan.navigation.model.Gps;
 
-public class PositionUtil {
+class PositionUtil {
 
-    public static double pi = 3.1415926535897932384626;
-    public static double a = 6378245.0;
-    public static double ee = 0.00669342162296594323;
+    private static double pi = 3.1415926535897932384626;
+    private static double a = 6378245.0;
+    private static double ee = 0.00669342162296594323;
 
     public static Gps gps84_To_Gcj02(double lat, double lon) {
         if (outOfChina(lat, lon)) {

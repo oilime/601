@@ -11,60 +11,61 @@ import com.lanan.zigbeetransmission.dataclass.NavigationInfo;
 import java.util.ArrayList;
 
 public class DataTask extends Thread {
-	
-	private LocationInfo mLocation;
-	private TriRegon triRegion;
-	private ArrayList<LocationInfo> destination;
-	private int currentL = 0;
-	private boolean initFlag = true;
+
+    private LocationInfo mLocation;
+    private TriRegon triRegion;
+    private ArrayList<LocationInfo> destination;
+    private int currentL = 0;
+    private boolean initFlag = true;
     private boolean interrupt = false;
 
     private NavigationInfo info;
 
     public ArrayList<LocationInfo> getDestination() {
-		return destination;
-	}
-    
-	public void setDestination(ArrayList<LocationInfo> destination) {
-		this.destination = destination;
-	}
-    
-	public boolean isInterrupt() {
-		return interrupt;
-	}
+        return destination;
+    }
 
-	public void setInterrupt(boolean interrupt) {
-		this.interrupt = interrupt;
-	}
-    
-	private synchronized LocationInfo getmLocation() {
-		return mLocation;
-	}
-	public synchronized  void setmLocation(LocationInfo mLocation) {
-		this.mLocation = mLocation;
-	}
-    
-	@Override
-	public void run() {
-	    LocationInfo location ;
+    public void setDestination(ArrayList<LocationInfo> destination) {
+        this.destination = destination;
+    }
+
+    public boolean isInterrupt() {
+        return interrupt;
+    }
+
+    public void setInterrupt(boolean interrupt) {
+        this.interrupt = true;
+    }
+
+    private synchronized LocationInfo getmLocation() {
+        return mLocation;
+    }
+
+    public synchronized void setmLocation(LocationInfo mLocation) {
+        this.mLocation = mLocation;
+    }
+
+    @Override
+    public void run() {
+        LocationInfo location;
         Direction direction;
-		while(!interrupt){
-	        if(currentL == destination.size()){
-			    break;
-		    }
+        while (!interrupt) {
+            if (currentL == destination.size()) {
+                break;
+            }
 
-            while((location = getmLocation()) == null){
+            while ((location = getmLocation()) == null) {
                 try {
                     Thread.sleep(1000);
-                }catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-            if(initFlag){
+            if (initFlag) {
                 triRegion = null;
                 triRegion = NativeInterface.gen(location.getLng(), location.getLat(),
                         destination.get(currentL).getLng(), destination.get(currentL).getLat());
-                while(triRegion == null){
+                while (triRegion == null) {
                     try {
                         sleep(100);
                     } catch (InterruptedException e) {
@@ -77,16 +78,16 @@ public class DataTask extends Thread {
             }
             direction = NativeInterface.nav(location.getLng(), location.getLat(),
                     destination.get(currentL).getLng(), destination.get(currentL).getLat());
-            if(direction.getDis() <=  NativeInterface.LIMIT_REGEN){
+            if (direction.getDis() <= NativeInterface.LIMIT_REGEN) {
                 currentL++;
                 initFlag = true;
                 setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL + 1,
                         true, false));
                 continue;
             }
-            if(!NativeInterface.rck(location.getLng(), location.getLat(), triRegion.getmA().getLng(), triRegion.getmA().getLat(),
+            if (!NativeInterface.rck(location.getLng(), location.getLat(), triRegion.getmA().getLng(), triRegion.getmA().getLat(),
                     triRegion.getmB().getLng(), triRegion.getmB().getLat(),
-                    triRegion.getmO().getLng(), triRegion.getmO().getLat())){
+                    triRegion.getmO().getLng(), triRegion.getmO().getLat())) {
                 initFlag = true;
                 setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL + 1,
                         false, true));
@@ -95,19 +96,20 @@ public class DataTask extends Thread {
             setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL + 1,
                     false, false));
         }
-        if (currentL == destination.size()){
+        if (currentL == destination.size()) {
             Log.d("Emilio", "arrived");
         }
     }
 
     public NavigationInfo getInfo() {
-        synchronized (this.getClass()){
+        synchronized (this.getClass()) {
             return info;
         }
 
     }
-    private void setInfo (NavigationInfo ofni) {
-        synchronized (this.getClass()){
+
+    private void setInfo(NavigationInfo ofni) {
+        synchronized (this.getClass()) {
             this.info = ofni;
         }
     }
