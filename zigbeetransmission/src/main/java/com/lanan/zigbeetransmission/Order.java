@@ -14,7 +14,6 @@ import java.util.LinkedList;
 public class Order {
 
     private final byte[] head = new byte[]{(byte) 0xfe, (byte) 0xdd, (byte) 0xdf};    //数据包头
-    @SuppressWarnings("FieldCanBeLocal")
     private final byte[] oriLen = new byte[]{0x1a};                                     //a-->b数据包长度:26
     private final byte[] naviLen = new byte[]{0x23};                                     //b-->c数据包长度:35
     private final byte[] userId = new byte[]{0x01};                                     //用户id
@@ -28,6 +27,7 @@ public class Order {
     private final byte[] posSig = new byte[]{0x43};                                     //标志位，后方数据为路径点号
     private final byte[] arriveSig = new byte[]{0x1a};                                     //标志位，后方数据为是否达到
     private final byte[] yawSig = new byte[]{0x11};                                     //标志位，后方数据为是否偏航
+    private byte[] doBuffer = new byte[1024];
 
     private ArrayList<SendPackage> sendList = new ArrayList<>();
     private ArrayList<SendPackage> recvList;
@@ -35,16 +35,14 @@ public class Order {
     private ArrayList<NavigationInfo> navigationList = new ArrayList<>();
     private LinkedList<NavigationInfo> recvNavigationList = new LinkedList<>();
     private PortClass port;
-    private int count = 0;
 
     public enum Type {SET_ORIGIN, UNPACK_ORIGIN, SET_NAVIGATION, UNPACK_NAVIGATION}
-
     private Type orderType;
-    private boolean isReadFinished = false;
-    @SuppressWarnings("FieldCanBeLocal")
-    private final boolean isWriteFinished = false;
 
-    private byte[] doBuffer = new byte[1024];
+    private boolean isReadFinished = false;
+    private boolean isWriteFinished = false;
+
+    private int count = 0;
     private int doCount = 0;
 
     private Thread receive;
@@ -126,7 +124,6 @@ public class Order {
     }
 
     public boolean setPackage() {
-        boolean FAIL = false;
         switch (orderType) {
             case SET_NAVIGATION:
                 int sendLen = sendList.size();
@@ -180,14 +177,13 @@ public class Order {
 
                             sendList.add(new SendPackage(packageData));
                         } catch (Exception e) {
-                            return FAIL;
+                            return false;
                         }
                     }
-                    boolean SUCCESS = true;
-                    return SUCCESS;
+                    return true;
                 }
         }
-        return FAIL;
+        return false;
     }
 
     public void getPackage() {
@@ -413,6 +409,7 @@ public class Order {
                     }
                     Log.d("Emilio", "write:" + parseByte2HexStr(writeBuffer));
                 }
+                isWriteFinished = true;
                 break;
             case SET_NAVIGATION:
                 send = new sendThread();
@@ -583,10 +580,9 @@ public class Order {
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    private byte[] bufferSet(byte[] bytes) {
+    private void bufferSet(byte[] bytes) {
         for (int i = 0; i < bytes.length; i++) {
             bytes[i] = 0;
         }
-        return bytes;
     }
 }

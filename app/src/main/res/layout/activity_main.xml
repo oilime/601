@@ -3,7 +3,7 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.MainActivity"
+    tools:context=".activities.NavigationActivity"
     tools:ignore="MergeRootFrame,UnusedResources">
 
     <com.lanan.navigation.draw.MyDraw

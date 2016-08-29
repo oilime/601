@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Locale;
 
-public class MainActivity extends Activity {
+public class NavigationActivity extends Activity {
 
     private MyDraw myDraw;
 
@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
 //                        }
 //
 //                        PortClass port = new PortClass(PortClass.portType.FTDI);
-//                        port.open(MainActivity.this);
+//                        port.open(NavigationActivity.this);
 //                        myOrder = new Order(data, port);
 //                        myOrder.write();
 //                        port.close();
@@ -145,7 +145,7 @@ public class MainActivity extends Activity {
 //                        }
 //
 //                        PortClass port = new PortClass(PortClass.portType.FTDI);
-//                        port.open(MainActivity.this);
+//                        port.open(NavigationActivity.this);
 //                        ArrayList<SendPackage> list = new ArrayList<>();
 //                        myOrder = new Order(list, port, Order.Type.UNPACK_ORIGIN);
 //                        myOrder.read();
@@ -172,7 +172,7 @@ public class MainActivity extends Activity {
                     myOrder = null;
                 }
 //                PortClass port = new PortClass(PortClass.portType.FTDI);
-//                port.open(MainActivity.this);
+//                port.open(NavigationActivity.this);
                 myOrder = new Order(data);
 
                 ArrayList<LocationInfo> locationInfos = myOrder.getLocationDataList();
@@ -231,7 +231,7 @@ public class MainActivity extends Activity {
 //                isGpsStop = true;
                 isDrawStop = true;
 
-                if (dataTask.isAlive()) {
+                if (dataTask != null && dataTask.isAlive()) {
                     dataTask.setInterrupt(true);
                     dataTask = null;
                 }
@@ -249,7 +249,7 @@ public class MainActivity extends Activity {
 
         PermissionCheck();
 
-        speech = new TextToSpeech(MainActivity.this, new TextToSpeech.OnInitListener() {
+        speech = new TextToSpeech(NavigationActivity.this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
             }
@@ -281,7 +281,7 @@ public class MainActivity extends Activity {
         LocationClientOption mOption = new LocationClientOption();
         mOption.setOpenGps(true);
         mOption.setCoorType("bd09ll");
-        mOption.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
+        mOption.setLocationMode(LocationClientOption.LocationMode.Device_Sensors);
         mOption.setScanSpan(1000);
 
         mLocationClient.setLocOption(mOption);
@@ -434,8 +434,8 @@ public class MainActivity extends Activity {
     }
 
     private final Handler mHandler = new MyHandler(this);
-    //    public Handler showHandler = new ShowHandler(this);
     private final Handler voiceHandler = new VoiceHandler(this);
+    //    public Handler showHandler = new ShowHandler(this);
 
     private class VoiceThread extends Thread{
         @Override
@@ -469,17 +469,17 @@ public class MainActivity extends Activity {
     }
 
     private void PermissionCheck() {
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
+        if (ContextCompat.checkSelfPermission(NavigationActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "无gps权限");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     ACCESS_FINE_LOCATION);
-        } else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        } else if (ContextCompat.checkSelfPermission(NavigationActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "无写文件权限");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     WRITE_EXTERNAL_STORAGE);
-        } else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE)
+        } else if (ContextCompat.checkSelfPermission(NavigationActivity.this, Manifest.permission.READ_PHONE_STATE)
                 != PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "无读取手机状态权限");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE},

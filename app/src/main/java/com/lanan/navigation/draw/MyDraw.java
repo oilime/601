@@ -15,9 +15,7 @@ import java.text.DecimalFormat;
 
 public class MyDraw extends View {
 
-    private Paint brush = new Paint();      //声明画笔
-    private final Paint oriBrush = new Paint();
-    private final Paint realBrush = new Paint();
+    private Paint brush = new Paint();
     private final Path path = new Path();
 
     private final DecimalFormat decimalFormat = new DecimalFormat("#.000000");
@@ -41,19 +39,11 @@ public class MyDraw extends View {
         super(context, attrs);
         this.setBackgroundColor(Color.GRAY);
 
-        oriBrush.setAntiAlias(true);
-        oriBrush.setColor(Color.BLUE);
-        oriBrush.setStyle(Paint.Style.STROKE);
-        oriBrush.setStrokeJoin(Paint.Join.ROUND);
-        oriBrush.setStrokeWidth(2);
-
-        realBrush.setAntiAlias(true);
-        realBrush.setColor(Color.YELLOW);
-        realBrush.setStyle(Paint.Style.STROKE);
-        realBrush.setStrokeJoin(Paint.Join.ROUND);
-        realBrush.setStrokeWidth(2);
-
-        this.brush = oriBrush;
+        brush.setAntiAlias(true);
+        brush.setColor(Color.BLUE);
+        brush.setStyle(Paint.Style.STROKE);
+        brush.setStrokeJoin(Paint.Join.ROUND);
+        brush.setStrokeWidth(2);
     }
 
     public MyDraw(Context context, AttributeSet attrs, int defStyle) {
@@ -100,13 +90,5 @@ public class MyDraw extends View {
                 return decimalFormat.format(south);
         }
         return null;
-    }
-
-    public void setBrush(boolean paint) {
-        if (paint) {
-            this.brush = oriBrush;
-        } else {
-            this.brush = realBrush;
-        }
     }
 }
