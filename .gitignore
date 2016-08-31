@@ -13,3 +13,5 @@ local.properties
 .idea/workspace.xml
 .idea/libraries
 /app/src/main/res/drawable-xxhdpi/
+/app/libs/
+/app/build/
