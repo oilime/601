@@ -57,7 +57,7 @@ public class NavigationActivity extends AppCompatActivity {
     private static TextView screen;
     private static TextView longitude;
     private static TextView latitude;
-//  /* 海东青 ---> */
+//  /* 海东青 ---> 往西 ---> 烈士公园西门 ---> 烈士公园南门 ---> 海东青 */
 //    private final double[][] data = {{112.992146, 28.210455}, {112.992538,28.21043},
 //            {112.99274,28.21384}, {112.988868,28.214198}, {112.98885,28.214421},
 //            {112.992776,28.214086}, {112.993234,28.214055}, {112.997968,28.213482},
@@ -81,11 +81,11 @@ public class NavigationActivity extends AppCompatActivity {
     private static final int RL = 1;
     private static final int SN = 2;
     private static final int RN = 3;
-    private static final int LNG_LAT = 5;
-    private static final int RECV_LOCATION = 6;
-    private static final int TEXT = 7;
-    private static final int ACCESS_FINE_LOCATION = 8;
-    private static final int WRITE_EXTERNAL_STORAGE = 9;
+    private static final int LNG_LAT = 4;
+    private static final int RECV_LOCATION = 5;
+    private static final int TEXT = 6;
+    private static final int ACCESS_FINE_LOCATION = 7;
+    private static final int WRITE_EXTERNAL_STORAGE = 8;
 
     private static final String TAG = "Emilio";
     private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
@@ -98,6 +98,7 @@ public class NavigationActivity extends AppCompatActivity {
     private static int curMode = 0;
     private static int curRate = 0;
     private static int curVoiceRate = 0;
+    private static int yawCount = 0;
 
     private static TextToSpeech speech;
 
@@ -111,8 +112,9 @@ public class NavigationActivity extends AppCompatActivity {
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayShowHomeEnabled(false);
+            actionBar.setDisplayShowHomeEnabled(true);
             actionBar.setDisplayShowTitleEnabled(true);
+            actionBar.setDisplayUseLogoEnabled(true);
         }
 
         myDraw = (MyDraw) this.findViewById(R.id.path);
@@ -309,6 +311,11 @@ public class NavigationActivity extends AppCompatActivity {
                         switch (type) {
                             case PORT:
                                 File file = getComFile();
+                                if (file == null){
+                                    refreshScreen("未找到传输设备文件,传输中止！\n");
+                                    return;
+                                }
+
                                 port = new PortClass(file, 115200, 0);
                                 break;
                             default:
@@ -463,7 +470,8 @@ public class NavigationActivity extends AppCompatActivity {
                         curPos = pos;
                     }
                     if (yaw) {
-                        refreshScreen("偏航！\n偏航！偏航！\n偏航！偏航！偏航！\n");
+                        yawCount++;
+                        refreshScreen("偏航！ ---- " + yawCount + " ----\n偏航！偏航！");
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             speech.speak("偏航", TextToSpeech.QUEUE_FLUSH, null, null);
                         }
@@ -586,33 +594,37 @@ public class NavigationActivity extends AppCompatActivity {
                     return;
                 }
 
+//                Log.d(TAG, "" + System.currentTimeMillis());
+
                 LocationInfo info = new LocationInfo(bdLocation.getLongitude(), bdLocation.getLatitude());
-                if (!showList.isEmpty()) {
-                    if (showList.size() > 13) {
-                        showList.pollFirst();
-                    }
-                    double lngCount = info.getLng();
-                    double latCount = info.getLat();
-                    for (LocationInfo s : showList) {
-                        lngCount += s.getLng();
-                        latCount += s.getLat();
-                    }
-                    double calLng = lngCount / (showList.size() + 1);
-                    double calLat = latCount / (showList.size() + 1);
-                    LocationInfo s = new LocationInfo(calLng, calLat);
-                    showList.addLast(s);
-                } else {
-                    showList.addLast(info);
-                }
+//                if (!showList.isEmpty()) {
+//                    if (showList.size() > 13) {
+//                        showList.pollFirst();
+//                    }
+//                    double lngCount = info.getLng();
+//                    double latCount = info.getLat();
+//                    for (LocationInfo s : showList) {
+//                        lngCount += s.getLng();
+//                        latCount += s.getLat();
+//                    }
+//                    double calLng = lngCount / (showList.size() + 1);
+//                    double calLat = latCount / (showList.size() + 1);
+//                    LocationInfo s = new LocationInfo(calLng, calLat);
+//                    showList.addLast(s);
+//                } else {
+//                    showList.addLast(info);
+//                }
 
                 Message message = new Message();
                 message.what = LNG_LAT;
                 Bundle bundle = new Bundle();
-                bundle.putDouble("longitude", showList.getLast().getLng());
-                bundle.putDouble("latitude", showList.getLast().getLat());
+                bundle.putDouble("longitude", info.getLng());
+                bundle.putDouble("latitude", info.getLat());
+//                bundle.putDouble("longitude", showList.getLast().getLng());
+//                bundle.putDouble("latitude", showList.getLast().getLat());
                 message.setData(bundle);
                 mHandler.sendMessage(message);
-                dataTask.setmLocation(showList.getLast());
+                dataTask.setmLocation(info);
             }
         });
         mLocationClient.start();
@@ -667,7 +679,7 @@ public class NavigationActivity extends AppCompatActivity {
         super.onDestroy();
         isDrawStop = true;
         if (myOrder != null) {
-//            myOrder.stop();
+            myOrder.stop();
             myOrder = null;
         }
 
