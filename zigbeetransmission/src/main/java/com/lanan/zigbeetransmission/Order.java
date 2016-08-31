@@ -491,13 +491,16 @@ public class Order {
 
     public void stop() {
         stopAllThread();
-        this.port.close();
+        if (this.port != null) {
+            this.port.close();
+        }
         doBuffer = null;
         sendList = null;
         recvList = null;
         recvNavigationList = null;
         locationList = null;
         navigationList = null;
+        System.gc();
     }
 
     public boolean getStatus() {

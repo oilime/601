@@ -4,12 +4,16 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -20,8 +24,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,6 +52,7 @@ import java.util.Locale;
 public class NavigationActivity extends AppCompatActivity {
 
     private MyDraw myDraw;
+    private CoordinatorLayout container;
 
     private static TextView screen;
     private static TextView longitude;
@@ -61,8 +64,8 @@ public class NavigationActivity extends AppCompatActivity {
 //            {112.998148,28.21458}, {112.999747,28.21458}, {112.999396,28.209455},
 //            {112.993674,28.209391}, {112.992291,28.209455}, {112.992146, 28.210455}};
 
-    private final double[][] data = {{112.992146, 28.210455}, {112.992538,28.21043}, {112.99274,28.21384},
-            {112.997968,28.213482}, {112.998148,28.21458}, {112.999747,28.21458}};
+    private final double[][] data = {{112.992146, 28.210455}, {112.992538, 28.21043}, {112.99274, 28.21384},
+            {112.997968, 28.213482}, {112.998148, 28.21458}, {112.999747, 28.21458}};
 
     private boolean isDrawStop;
 
@@ -82,6 +85,7 @@ public class NavigationActivity extends AppCompatActivity {
     private static final int TEXT = 7;
     private static final int ACCESS_FINE_LOCATION = 8;
     private static final int WRITE_EXTERNAL_STORAGE = 9;
+
     private static final String TAG = "Emilio";
     private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
     private static final DecimalFormat normalFormat = new DecimalFormat("#.00");
@@ -102,6 +106,8 @@ public class NavigationActivity extends AppCompatActivity {
         SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.huawei);
 
+        container = (CoordinatorLayout) this.findViewById(R.id.snack_container);
+
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayShowHomeEnabled(false);
@@ -114,16 +120,129 @@ public class NavigationActivity extends AppCompatActivity {
         screen = (TextView) this.findViewById(R.id.showtext);
         screen.setMovementMethod(ScrollingMovementMethod.getInstance());
 
-        Button sendLocation = (Button) this.findViewById(R.id.sendlocation);
-        Button recvLocation = (Button) this.findViewById(R.id.recvlocation);
-        Button drawPath = (Button) this.findViewById(R.id.drawpath);
-        Button closePort = (Button) this.findViewById(R.id.closeport);
-
         baiduLbsSet();
+        TextView nw = (TextView) this.findViewById(R.id.nw);
+        TextView ne = (TextView) this.findViewById(R.id.ne);
+        TextView sw = (TextView) this.findViewById(R.id.sw);
+        TextView se = (TextView) this.findViewById(R.id.se);
+        nw.append(myDraw.getParam(MyDraw.location.WEST) + ", " + myDraw.getParam(MyDraw.location.NORTH));
+        ne.append(myDraw.getParam(MyDraw.location.EAST) + ", " + myDraw.getParam(MyDraw.location.NORTH));
+        sw.append(myDraw.getParam(MyDraw.location.WEST) + ", " + myDraw.getParam(MyDraw.location.SOUTH));
+        se.append(myDraw.getParam(MyDraw.location.EAST) + ", " + myDraw.getParam(MyDraw.location.SOUTH));
 
-        sendLocation.setOnClickListener(new View.OnClickListener() {
+        PermissionCheck();
+
+        speech = new TextToSpeech(NavigationActivity.this, new TextToSpeech.OnInitListener() {
             @Override
-            public void onClick(View view) {
+            public void onInit(int status) {
+            }
+        });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.port_change:
+                AlertDialog.Builder builder = new AlertDialog.Builder(NavigationActivity.this);
+                builder.setTitle("请选择串口通信方式");
+                final String[] portList = {"设备文件方式", "CDCACM", "CP21", "FTDI", "PROLIFIC"};
+                builder.setSingleChoiceItems(portList, curMode, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        curMode = which;
+                        switch (which) {
+                            case 0:
+                                NavigationActivity.type = PortClass.portType.PORT;
+                                break;
+                            case 1:
+                                NavigationActivity.type = PortClass.portType.CDCACM;
+                                break;
+                            case 2:
+                                NavigationActivity.type = PortClass.portType.CP21;
+                                break;
+                            case 3:
+                                NavigationActivity.type = PortClass.portType.FTDI;
+                                break;
+                            case 4:
+                                NavigationActivity.type = PortClass.portType.PROLIFIC;
+                                break;
+                        }
+                        Snackbar snackbar = Snackbar.make(container, "当前串口方式为：" + portList[which], Snackbar.LENGTH_SHORT);
+                        snackbar.getView().setBackgroundColor(Color.parseColor("#A0141010"));
+                        snackbar.show();
+                        dialog.dismiss();
+                    }
+                });
+                builder.show();
+                break;
+            case R.id.rate_change:
+                AlertDialog.Builder rateBuilder = new AlertDialog.Builder(NavigationActivity.this);
+                rateBuilder.setTitle("请选择串口发送速率");
+                final String[] rateList = {"2000ms", "1000ms", "500ms", "100ms"};
+                rateBuilder.setSingleChoiceItems(rateList, curRate, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        curRate = which;
+                        switch (which) {
+                            case 0:
+                                NavigationActivity.rate = 2000;
+                                break;
+                            case 1:
+                                NavigationActivity.rate = 1000;
+                                break;
+                            case 2:
+                                NavigationActivity.rate = 500;
+                                break;
+                            case 3:
+                                NavigationActivity.rate = 100;
+                                break;
+                        }
+                        Snackbar snackbar = Snackbar.make(container, "当前串口发送速率为：" + rateList[which], Snackbar.LENGTH_SHORT);
+                        snackbar.getView().setBackgroundColor(Color.parseColor("#A0141010"));
+                        snackbar.show();
+                        dialog.dismiss();
+                    }
+                });
+                rateBuilder.show();
+                break;
+            case R.id.voice_rate:
+                AlertDialog.Builder voiceBuilder = new AlertDialog.Builder(NavigationActivity.this);
+                voiceBuilder.setTitle("请选择语音导航播报速率");
+                final String[] voiceRateList = {"30s", "60s", "90s", "15s"};
+                voiceBuilder.setSingleChoiceItems(voiceRateList, curVoiceRate, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        curVoiceRate = which;
+                        switch (which) {
+                            case 0:
+                                NavigationActivity.voiceRate = 30000;
+                                break;
+                            case 1:
+                                NavigationActivity.voiceRate = 60000;
+                                break;
+                            case 2:
+                                NavigationActivity.voiceRate = 90000;
+                                break;
+                            case 3:
+                                NavigationActivity.voiceRate = 15000;
+                                break;
+                        }
+                        Snackbar snackbar = Snackbar.make(container, "当前语音播报速率为：" + voiceRateList[which], Snackbar.LENGTH_SHORT);
+                        snackbar.getView().setBackgroundColor(Color.parseColor("#A0141010"));
+                        snackbar.show();
+                        dialog.dismiss();
+                    }
+                });
+                voiceBuilder.show();
+                break;
+            case R.id.send:
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -151,7 +270,9 @@ public class NavigationActivity extends AppCompatActivity {
                                     myOrder.stop();
                                     myOrder = null;
                                 } else {
-                                    Toast.makeText(NavigationActivity.this, "设备文件为空", Toast.LENGTH_SHORT).show();
+                                    Snackbar snackbar = Snackbar.make(container, "设备文件不存在", Snackbar.LENGTH_SHORT);
+                                    snackbar.getView().setBackgroundColor(Color.parseColor("#A0141010"));
+                                    snackbar.show();
                                 }
                                 break;
                             default:
@@ -172,13 +293,9 @@ public class NavigationActivity extends AppCompatActivity {
                         }
                     }
                 }).start();
-            }
-        });
-
-        recvLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                screen.append("start to recv...\n");
+                break;
+            case R.id.recv:
+                refreshScreen("start to recv...\n");
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -219,12 +336,8 @@ public class NavigationActivity extends AppCompatActivity {
                         showHandler.sendMessage(message);
                     }
                 }).start();
-            }
-        });
-
-        drawPath.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                break;
+            case R.id.start_navigation:
                 if (myOrder != null) {
                     myOrder.stop();
                     myOrder = null;
@@ -286,12 +399,8 @@ public class NavigationActivity extends AppCompatActivity {
                         showHandler.sendMessage(message);
                     }
                 }).start();
-            }
-        });
-
-        closePort.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+                break;
+            case R.id.close:
                 if (myOrder != null) {
                     myOrder.stop();
                     myOrder = null;
@@ -303,129 +412,13 @@ public class NavigationActivity extends AppCompatActivity {
                     dataTask = null;
                 }
 
-                Message message = new Message();
-                message.what = TEXT;
-                Bundle bundle = new Bundle();
-                bundle.putString("text", "停止！");
-                message.setData(bundle);
-                showHandler.sendMessage(message);
-            }
-        });
-
-        TextView nw = (TextView) this.findViewById(R.id.nw);
-        TextView ne = (TextView) this.findViewById(R.id.ne);
-        TextView sw = (TextView) this.findViewById(R.id.sw);
-        TextView se = (TextView) this.findViewById(R.id.se);
-        nw.append(myDraw.getParam(MyDraw.location.WEST) + ", " + myDraw.getParam(MyDraw.location.NORTH));
-        ne.append(myDraw.getParam(MyDraw.location.EAST) + ", " + myDraw.getParam(MyDraw.location.NORTH));
-        sw.append(myDraw.getParam(MyDraw.location.WEST) + ", " + myDraw.getParam(MyDraw.location.SOUTH));
-        se.append(myDraw.getParam(MyDraw.location.EAST) + ", " + myDraw.getParam(MyDraw.location.SOUTH));
-
-        PermissionCheck();
-
-        speech = new TextToSpeech(NavigationActivity.this, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-            }
-        });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.port_change:
-                AlertDialog.Builder builder = new AlertDialog.Builder(NavigationActivity.this);
-                builder.setTitle("请选择串口通信方式");
-                final String[] portList = {"设备文件方式", "CDCACM", "CP21", "FTDI", "PROLIFIC"};
-                builder.setSingleChoiceItems(portList, curMode, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        curMode = which;
-                        switch (which) {
-                            case 0:
-                                NavigationActivity.type = PortClass.portType.PORT;
-                                break;
-                            case 1:
-                                NavigationActivity.type = PortClass.portType.CDCACM;
-                                break;
-                            case 2:
-                                NavigationActivity.type = PortClass.portType.CP21;
-                                break;
-                            case 3:
-                                NavigationActivity.type = PortClass.portType.FTDI;
-                                break;
-                            case 4:
-                                NavigationActivity.type = PortClass.portType.PROLIFIC;
-                                break;
-                        }
-                        Toast.makeText(NavigationActivity.this, "当前串口方式为:" + portList[which], Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
-                    }
-                });
-                builder.show();
+                Message clMessage = new Message();
+                clMessage.what = TEXT;
+                Bundle bundle1 = new Bundle();
+                bundle1.putString("text", "停止！");
+                clMessage.setData(bundle1);
+                showHandler.sendMessage(clMessage);
                 break;
-            case R.id.rate_change:
-                AlertDialog.Builder rateBuilder = new AlertDialog.Builder(NavigationActivity.this);
-                rateBuilder.setTitle("请选择串口发送速率");
-                final String[] rateList = {"2000ms", "1000ms", "500ms", "100ms"};
-                rateBuilder.setSingleChoiceItems(rateList, curRate, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        curRate = which;
-                        switch (which) {
-                            case 0:
-                                NavigationActivity.rate = 2000;
-                                break;
-                            case 1:
-                                NavigationActivity.rate = 1000;
-                                break;
-                            case 2:
-                                NavigationActivity.rate = 500;
-                                break;
-                            case 3:
-                                NavigationActivity.rate = 100;
-                                break;
-                        }
-                        Toast.makeText(NavigationActivity.this, "当前串口发送速率为:" + rateList[which], Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
-                    }
-                });
-                rateBuilder.show();
-                break;
-            case R.id.voice_rate:
-                AlertDialog.Builder voiceBuilder = new AlertDialog.Builder(NavigationActivity.this);
-                voiceBuilder.setTitle("请选择语音导航播报速率");
-                final String[] voiceRateList = {"30s", "60s", "90s", "15s"};
-                voiceBuilder.setSingleChoiceItems(voiceRateList, curVoiceRate, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        curVoiceRate = which;
-                        switch (which) {
-                            case 0:
-                                NavigationActivity.voiceRate = 30000;
-                                break;
-                            case 1:
-                                NavigationActivity.voiceRate = 60000;
-                                break;
-                            case 2:
-                                NavigationActivity.voiceRate = 90000;
-                                break;
-                            case 3:
-                                NavigationActivity.voiceRate = 15000;
-                                break;
-                        }
-                        Toast.makeText(NavigationActivity.this, "当前语音播报速率为:" + voiceRateList[which], Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
-                    }
-                });
-                voiceBuilder.show();
             default:
                 break;
         }
@@ -447,9 +440,6 @@ public class NavigationActivity extends AppCompatActivity {
                 case SL:
                     break;
                 case RL:
-                    double lng = bundle.getDouble("longitude");
-                    double lat = bundle.getDouble("latitude");
-                    refreshScreen("Time: " + time + " Longitude: " + lng + " Latitude: " + lat + "\n");
                     break;
                 case SN:
                     break;
@@ -458,10 +448,9 @@ public class NavigationActivity extends AppCompatActivity {
                     double angle = bundle.getDouble("angle");
                     int pos = bundle.getInt("pos");
                     boolean yaw = bundle.getBoolean("yaw", false);
-                    refreshScreen("Time: " + time +
+                    refreshScreen("Time: " + time + " Target: " + pos +
                             "\nDistance: " + normalFormat.format(dis) +
-                            " Angle: " + normalFormat.format(angle) +
-                            "\nPos: " + pos + "\n");
+                            "m Angle: " + normalFormat.format(angle) + "°\n");
                     if (pos > curPos) {
                         int a = Double.valueOf(dis).intValue();
                         int b = Double.valueOf(angle).intValue();
@@ -491,6 +480,7 @@ public class NavigationActivity extends AppCompatActivity {
 
     private static class ShowHandler extends Handler {
         private final WeakReference<Activity> mActivity;
+
         public ShowHandler(Activity activity) {
             mActivity = new WeakReference<>(activity);
         }
@@ -499,13 +489,13 @@ public class NavigationActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case RECV_LOCATION:
-                    screen.append("已接受到路径点信息\n");
+                    refreshScreen("已接受到路径点信息\n");
                     break;
                 case TEXT:
                     Bundle bundle = msg.getData();
-                    if (bundle != null && bundle.containsKey("text")){
+                    if (bundle != null && bundle.containsKey("text")) {
                         String text = bundle.getString("text");
-                        screen.append(text + "\n");
+                        refreshScreen(text + "\n");
                     }
                     break;
             }
@@ -514,6 +504,7 @@ public class NavigationActivity extends AppCompatActivity {
 
     private static class VoiceHandler extends Handler {
         private final WeakReference<Activity> mActivity;
+
         public VoiceHandler(Activity activity) {
             mActivity = new WeakReference<>(activity);
         }
@@ -560,6 +551,7 @@ public class NavigationActivity extends AppCompatActivity {
         }
     }
 
+    @Nullable
     private File getComFile() {
         File devDir = new File("/dev");
         if (devDir.isDirectory() && devDir.canRead()) {
