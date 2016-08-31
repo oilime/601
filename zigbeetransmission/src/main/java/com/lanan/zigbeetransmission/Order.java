@@ -44,6 +44,7 @@ public class Order {
 
     private int count = 0;
     private int doCount = 0;
+    private int rate = 2000;
 
     private Thread receive;
     private Thread send;
@@ -60,6 +61,7 @@ public class Order {
             LocationInfo info = new LocationInfo(p[0], p[1]);
             locationList.add(info);
         }
+        this.orderType = Type.SET_ORIGIN;
     }
 
     public Order(double[][] data, PortClass port) {
@@ -329,7 +331,7 @@ public class Order {
                         port.write(navigationPackage, 0, navigationPackage.length);
                         count++;
                         try {
-                            Thread.sleep(500);
+                            Thread.sleep(rate);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -403,7 +405,7 @@ public class Order {
                     byte[] writeBuffer = p.getPackageData();
                     port.write(writeBuffer, 0, writeBuffer.length);
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(rate);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -432,13 +434,13 @@ public class Order {
             return null;
     }
 
-    public PortClass getPort() {
-        return this.port;
-    }
-
     public void setOrder(PortClass port, Type type) {
         this.port = port;
         this.orderType = type;
+    }
+
+    public void setSendRate (int rate) {
+        this.rate = rate;
     }
 
     private void stopAllThread() {
@@ -500,10 +502,11 @@ public class Order {
 
     public boolean getStatus() {
         switch (orderType) {
-            case UNPACK_ORIGIN:
-                return isReadFinished;
+            case SET_ORIGIN:
             case SET_NAVIGATION:
                 return isWriteFinished;
+            case UNPACK_ORIGIN:
+                return isReadFinished;
             default:
                 return false;
         }

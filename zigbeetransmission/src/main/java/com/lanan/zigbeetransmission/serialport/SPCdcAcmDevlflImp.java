@@ -12,6 +12,7 @@ import android.hardware.usb.UsbRequest;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class SPCdcAcmDevlflImp implements IDeviceIf {
     private byte[] mReadBuffer, mWriteBuffer;
 
     @Override
-    public void Open(Context mContext) {
+    public boolean Open(Context mContext) {
         mReadBuffer = new byte[1024];
         mWriteBuffer = new byte[1024];
         boolean isOpen = false;
@@ -64,21 +65,25 @@ public class SPCdcAcmDevlflImp implements IDeviceIf {
                 }
             }
             if (device == null) {
-                throw new RuntimeException("�豸������");
+                Toast.makeText(mContext, "设备不存在", Toast.LENGTH_SHORT).show();
+                return false;
             }
             if (!usbManager.hasPermission(device)) {
                 PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, new Intent("com.scd.USBPermission"), 0);
                 usbManager.requestPermission(device, pi);
             }
             if (!usbManager.hasPermission(device)) {
-                throw new RuntimeException("�޷���Ȩ��");
+                Toast.makeText(mContext, "无访问权限", Toast.LENGTH_SHORT).show();
+                return false;
             }
             mConnection = usbManager.openDevice(device);
             if (mConnection == null) {
-                throw new RuntimeException("���豸ʧ��");
+                Toast.makeText(mContext, "打开设备失败", Toast.LENGTH_SHORT).show();
+                return false;
             }
             if (!mConnection.claimInterface(device.getInterface(0), true)) {
-                throw new RuntimeException("���豸�ӿ�ʧ��");
+                Toast.makeText(mContext, "打开设备接口失败", Toast.LENGTH_SHORT).show();
+                return false;
             }
             purgeHwBuffers();
 
@@ -111,6 +116,7 @@ public class SPCdcAcmDevlflImp implements IDeviceIf {
                 }
             }
         }
+        return true;
     }
 
     @Override

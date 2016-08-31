@@ -74,7 +74,11 @@ public class DataTask extends Thread {
             }
             direction = NativeInterface.nav(location.getLng(), location.getLat(),
                     destination.get(currentL).getLng(), destination.get(currentL).getLat());
-            if (direction.getDis() <= NativeInterface.LIMIT_REGEN) {
+            if (direction.getDis() <= NativeInterface.LIMIT_REGEN  /*||
+                    ((currentL < destination.size() - 1) &&
+                            (NativeInterface.rch2(location.getLng(), location.getLat(),
+                                    destination.get(currentL).getLng(), destination.get(currentL).getLat(),
+                                    destination.get(currentL + 1).getLng(), destination.get(currentL).getLat())))*/) {
                 currentL++;
                 initFlag = true;
                 setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL + 1,
@@ -101,7 +105,6 @@ public class DataTask extends Thread {
         synchronized (this.getClass()) {
             return info;
         }
-
     }
 
     private void setInfo(NavigationInfo ofni) {

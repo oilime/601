@@ -2,18 +2,24 @@ package com.lanan.navigation.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -30,10 +36,10 @@ import com.lanan.navigation.draw.MyDraw;
 import com.lanan.zigbeetransmission.Order;
 import com.lanan.zigbeetransmission.dataclass.LocationInfo;
 import com.lanan.zigbeetransmission.dataclass.NavigationInfo;
+import com.lanan.zigbeetransmission.dataclass.PortClass;
+import com.lanan.zigbeetransmission.dataclass.SendPackage;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -41,7 +47,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Locale;
 
-public class NavigationActivity extends Activity {
+public class NavigationActivity extends AppCompatActivity {
 
     private MyDraw myDraw;
 
@@ -49,34 +55,44 @@ public class NavigationActivity extends Activity {
     private static TextView longitude;
     private static TextView latitude;
 
-    private final double[][] data = {{112.992146, 28.210455}, {112.992511, 28.210442},
-            {112.992792, 28.213875}, {112.993196, 28.213836}, {112.995725, 28.213625},
-            {112.99771, 28.213358}, {112.997912, 28.213342}, {112.997822, 28.212547}};
+//    private final double[][] data = {{112.992146, 28.210455}, {112.992538,28.21043},
+//            {112.99274,28.21384}, {112.988868,28.214198}, {112.98885,28.214421},
+//            {112.992776,28.214086}, {112.993234,28.214055}, {112.997968,28.213482},
+//            {112.998148,28.21458}, {112.999747,28.21458}, {112.999396,28.209455},
+//            {112.993674,28.209391}, {112.992291,28.209455}, {112.992146, 28.210455}};
+
+    private final double[][] data = {{112.992146, 28.210455}, {112.992538,28.21043}, {112.99274,28.21384},
+            {112.997968,28.213482}, {112.998148,28.21458}, {112.999747,28.21458}};
 
     private boolean isDrawStop;
-//    private boolean isGpsStop = false;
 
     //    private NavigationInfo nInfo;
     private Order myOrder;
     private DataTask dataTask;
-    private final LinkedList<LocationInfo> showList = new LinkedList<>();
-    private OutputStreamWriter out;
     private LocationClient mLocationClient;
+    private ArrayList<LocationInfo> locationInfos = new ArrayList<>();
+    private final LinkedList<LocationInfo> showList = new LinkedList<>();
 
-    private static int curPos = 1;
     private static final int SL = 0;
     private static final int RL = 1;
     private static final int SN = 2;
     private static final int RN = 3;
     private static final int LNG_LAT = 5;
     private static final int RECV_LOCATION = 6;
-    private static final int ACCESS_FINE_LOCATION = 7;
-    private static final int WRITE_EXTERNAL_STORAGE = 8;
-    private static final int READ_PHONE_STATE = 9;
+    private static final int TEXT = 7;
+    private static final int ACCESS_FINE_LOCATION = 8;
+    private static final int WRITE_EXTERNAL_STORAGE = 9;
     private static final String TAG = "Emilio";
     private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
     private static final DecimalFormat normalFormat = new DecimalFormat("#.00");
     private static final DecimalFormat lngFormat = new DecimalFormat("#.000000");
+    private static PortClass.portType type = PortClass.portType.PORT;
+    private static int rate = 2000;
+    private static int voiceRate = 30000;
+    private static int curPos = 1;
+    private static int curMode = 0;
+    private static int curRate = 0;
+    private static int curVoiceRate = 0;
 
     private static TextToSpeech speech;
 
@@ -86,14 +102,10 @@ public class NavigationActivity extends Activity {
         SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.huawei);
 
-        try {
-            File file = new File(Environment.getExternalStorageDirectory().getPath() + "/gpsdata/info.txt");
-            if (!file.exists()) {
-                @SuppressWarnings("UnusedAssignment") boolean recv = file.createNewFile();
-            }
-            out = new OutputStreamWriter(new FileOutputStream(file));
-        } catch (Exception e) {
-            e.printStackTrace();
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowHomeEnabled(false);
+            actionBar.setDisplayShowTitleEnabled(true);
         }
 
         myDraw = (MyDraw) this.findViewById(R.id.path);
@@ -112,70 +124,114 @@ public class NavigationActivity extends Activity {
         sendLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        if (myOrder != null) {
-//                            myOrder.getPort().close();
-//                            myOrder.stop();
-//                            myOrder = null;
-//                        }
-//
-//                        PortClass port = new PortClass(PortClass.portType.FTDI);
-//                        port.open(NavigationActivity.this);
-//                        myOrder = new Order(data, port);
-//                        myOrder.write();
-//                        port.close();
-//                    }
-//                }).start();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (myOrder != null) {
+                            myOrder.stop();
+                            myOrder = null;
+                        }
+                        PortClass port;
+                        switch (type) {
+                            case PORT:
+                                File file = getComFile();
+                                if (file != null) {
+                                    port = new PortClass(file, 115200, 0);
+                                    port.open(NavigationActivity.this);
+                                    myOrder = new Order(data, port);
+                                    myOrder.setSendRate(rate);
+                                    myOrder.write();
+                                    while (!myOrder.getStatus()) {
+                                        try {
+                                            Thread.sleep(500);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    myOrder.stop();
+                                    myOrder = null;
+                                } else {
+                                    Toast.makeText(NavigationActivity.this, "设备文件为空", Toast.LENGTH_SHORT).show();
+                                }
+                                break;
+                            default:
+                                port = new PortClass(type);
+                                port.open(NavigationActivity.this);
+                                myOrder = new Order(data, port);
+                                myOrder.write();
+                                while (!myOrder.getStatus()) {
+                                    try {
+                                        Thread.sleep(500);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                myOrder.stop();
+                                myOrder = null;
+                                break;
+                        }
+                    }
+                }).start();
             }
         });
 
         recvLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                screen.append("start to recv...\n");
-//                new Thread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        if (myOrder != null) {
-//                            myOrder.getPort().close();
-//                            myOrder.stop();
-//                            myOrder = null;
-//                        }
-//
-//                        PortClass port = new PortClass(PortClass.portType.FTDI);
-//                        port.open(NavigationActivity.this);
-//                        ArrayList<SendPackage> list = new ArrayList<>();
-//                        myOrder = new Order(list, port, Order.Type.UNPACK_ORIGIN);
-//                        myOrder.read();
-//                        while (!myOrder.getStatus()){
-//                            try {
-//                                Thread.sleep(500);
-//                            }catch (Exception e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                        Message message = new Message();
-//                        message.what = RECV_LOCATION;
-//                        showHandler.sendMessage(message);
-//                    }
-//                }).start();
+                screen.append("start to recv...\n");
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (myOrder != null) {
+                            myOrder.stop();
+                            myOrder = null;
+                        }
+
+                        PortClass port;
+                        switch (type) {
+                            case PORT:
+                                File file = getComFile();
+                                port = new PortClass(file, 115200, 0);
+                                break;
+                            default:
+                                port = new PortClass(type);
+                        }
+                        port.open(NavigationActivity.this);
+                        ArrayList<SendPackage> list = new ArrayList<>();
+                        myOrder = new Order(list, port, Order.Type.UNPACK_ORIGIN);
+                        myOrder.read();
+                        while (myOrder != null && !myOrder.getStatus()) {
+                            try {
+                                Thread.sleep(500);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        if (myOrder == null) {
+                            return;
+                        }
+                        myOrder.getPackage();
+                        locationInfos = myOrder.getLocationDataList();
+                        myOrder.stop();
+                        myOrder = null;
+                        Message message = new Message();
+                        message.what = RECV_LOCATION;
+                        showHandler.sendMessage(message);
+                    }
+                }).start();
             }
         });
 
         drawPath.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /* Test code */
                 if (myOrder != null) {
+                    myOrder.stop();
                     myOrder = null;
                 }
-//                PortClass port = new PortClass(PortClass.portType.FTDI);
-//                port.open(NavigationActivity.this);
                 myOrder = new Order(data);
-
-                ArrayList<LocationInfo> locationInfos = myOrder.getLocationDataList();
+                myOrder.setPackage();
+                locationInfos = myOrder.getLocationDataList();
                 for (LocationInfo infos : locationInfos) {
                     if (infos.equals(locationInfos.get(0)))
                         myDraw.drawOrigin(infos);
@@ -189,6 +245,11 @@ public class NavigationActivity extends Activity {
                 VoiceThread voiceThread = new VoiceThread();
                 voiceThread.start();
                 isDrawStop = false;
+                Message message = new Message();
+                message.what = TEXT;
+                Bundle bundle = new Bundle();
+                bundle.putString("text", "导航开始");
+                showHandler.sendMessage(message);
 
                 new Thread(new Runnable() {
                     @Override
@@ -217,6 +278,12 @@ public class NavigationActivity extends Activity {
                                 }
                             }
                         }
+                        Message message = new Message();
+                        message.what = TEXT;
+                        Bundle bundle = new Bundle();
+                        bundle.putString("text", "导航结束");
+                        message.setData(bundle);
+                        showHandler.sendMessage(message);
                     }
                 }).start();
             }
@@ -226,15 +293,22 @@ public class NavigationActivity extends Activity {
             @Override
             public void onClick(View view) {
                 if (myOrder != null) {
+                    myOrder.stop();
                     myOrder = null;
                 }
-//                isGpsStop = true;
                 isDrawStop = true;
 
                 if (dataTask != null && dataTask.isAlive()) {
                     dataTask.setInterrupt(true);
                     dataTask = null;
                 }
+
+                Message message = new Message();
+                message.what = TEXT;
+                Bundle bundle = new Bundle();
+                bundle.putString("text", "停止！");
+                message.setData(bundle);
+                showHandler.sendMessage(message);
             }
         });
 
@@ -256,87 +330,106 @@ public class NavigationActivity extends Activity {
         });
     }
 
-//    public synchronized void setnInfo(NavigationInfo info){
-//        nInfo = info;
-//    }
-//
-//    public synchronized NavigationInfo getnInfo(){
-//        return nInfo;
-//    }
-//
-//    private String parseByte2HexStr(byte[] buf) {
-//        StringBuilder sb = new StringBuilder();
-//        for (byte i: buf) {
-//            String hex = Integer.toHexString(i & 0xFF);
-//            if (hex.length() == 1) {
-//                hex = '0' + hex;
-//            }
-//            sb.append(hex.toUpperCase());
-//        }
-//        return sb.toString();
-//    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
-    private void baiduLbsSet() {
-        mLocationClient = new LocationClient(this);
-        LocationClientOption mOption = new LocationClientOption();
-        mOption.setOpenGps(true);
-        mOption.setCoorType("bd09ll");
-        mOption.setLocationMode(LocationClientOption.LocationMode.Device_Sensors);
-        mOption.setScanSpan(1000);
-
-        mLocationClient.setLocOption(mOption);
-        mLocationClient.registerLocationListener(new BDLocationListener() {
-            @Override
-            public void onReceiveLocation(BDLocation bdLocation) {
-                if (bdLocation == null) {
-                    return;
-                }
-
-                if (bdLocation.getLocType() != 61 && bdLocation.getLocType() != 161) {
-                    return;
-                }
-
-                LocationInfo info = new LocationInfo(bdLocation.getLongitude(), bdLocation.getLatitude());
-                String curDate = timeFormat.format(System.currentTimeMillis());
-                String data = "时间：" + curDate + " 经度：" + info.getLng() + " 纬度：" + info.getLat() + "\n";
-
-                try {
-                    out.write(data);
-                    out.flush();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                if (!showList.isEmpty()) {
-                    if (showList.size() > 4) {
-                        showList.pollFirst();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.port_change:
+                AlertDialog.Builder builder = new AlertDialog.Builder(NavigationActivity.this);
+                builder.setTitle("请选择串口通信方式");
+                final String[] portList = {"设备文件方式", "CDCACM", "CP21", "FTDI", "PROLIFIC"};
+                builder.setSingleChoiceItems(portList, curMode, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        curMode = which;
+                        switch (which) {
+                            case 0:
+                                NavigationActivity.type = PortClass.portType.PORT;
+                                break;
+                            case 1:
+                                NavigationActivity.type = PortClass.portType.CDCACM;
+                                break;
+                            case 2:
+                                NavigationActivity.type = PortClass.portType.CP21;
+                                break;
+                            case 3:
+                                NavigationActivity.type = PortClass.portType.FTDI;
+                                break;
+                            case 4:
+                                NavigationActivity.type = PortClass.portType.PROLIFIC;
+                                break;
+                        }
+                        Toast.makeText(NavigationActivity.this, "当前串口方式为:" + portList[which], Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
                     }
-                    double lngCount = info.getLng();
-                    double latCount = info.getLat();
-                    for (LocationInfo s : showList) {
-                        lngCount += s.getLng();
-                        latCount += s.getLat();
+                });
+                builder.show();
+                break;
+            case R.id.rate_change:
+                AlertDialog.Builder rateBuilder = new AlertDialog.Builder(NavigationActivity.this);
+                rateBuilder.setTitle("请选择串口发送速率");
+                final String[] rateList = {"2000ms", "1000ms", "500ms", "100ms"};
+                rateBuilder.setSingleChoiceItems(rateList, curRate, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        curRate = which;
+                        switch (which) {
+                            case 0:
+                                NavigationActivity.rate = 2000;
+                                break;
+                            case 1:
+                                NavigationActivity.rate = 1000;
+                                break;
+                            case 2:
+                                NavigationActivity.rate = 500;
+                                break;
+                            case 3:
+                                NavigationActivity.rate = 100;
+                                break;
+                        }
+                        Toast.makeText(NavigationActivity.this, "当前串口发送速率为:" + rateList[which], Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
                     }
-                    double calLng = lngCount / (showList.size() + 1);
-                    double calLat = latCount / (showList.size() + 1);
-                    LocationInfo s = new LocationInfo(calLng, calLat);
-                    showList.addLast(s);
-                } else {
-                    showList.addLast(info);
-                }
-
-                Message message = new Message();
-                message.what = LNG_LAT;
-                Bundle bundle = new Bundle();
-                bundle.putDouble("longitude", showList.getLast().getLng());
-                bundle.putDouble("latitude", showList.getLast().getLat());
-                message.setData(bundle);
-                mHandler.sendMessage(message);
-                dataTask.setmLocation(showList.getLast());
-            }
-        });
-        mLocationClient.start();
-        mLocationClient.requestLocation();
+                });
+                rateBuilder.show();
+                break;
+            case R.id.voice_rate:
+                AlertDialog.Builder voiceBuilder = new AlertDialog.Builder(NavigationActivity.this);
+                voiceBuilder.setTitle("请选择语音导航播报速率");
+                final String[] voiceRateList = {"30s", "60s", "90s", "15s"};
+                voiceBuilder.setSingleChoiceItems(voiceRateList, curVoiceRate, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        curVoiceRate = which;
+                        switch (which) {
+                            case 0:
+                                NavigationActivity.voiceRate = 30000;
+                                break;
+                            case 1:
+                                NavigationActivity.voiceRate = 60000;
+                                break;
+                            case 2:
+                                NavigationActivity.voiceRate = 90000;
+                                break;
+                            case 3:
+                                NavigationActivity.voiceRate = 15000;
+                                break;
+                        }
+                        Toast.makeText(NavigationActivity.this, "当前语音播报速率为:" + voiceRateList[which], Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
+                });
+                voiceBuilder.show();
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private static class MyHandler extends Handler {
@@ -396,23 +489,30 @@ public class NavigationActivity extends Activity {
         }
     }
 
-//    private static class ShowHandler extends Handler{
-//        private final WeakReference<Activity> mActivity;
-//        public ShowHandler(Activity activity) {
-//            mActivity = new WeakReference<>(activity);
-//        }
-//        @Override
-//        public void handleMessage(Message msg) {
-//            switch (msg.what) {
-//                case RECV_LOCATION:
-//                    screen.append("已接受到路径点信息\n");
-//                    break;
-//            }
-//        }
-//    }
+    private static class ShowHandler extends Handler {
+        private final WeakReference<Activity> mActivity;
+        public ShowHandler(Activity activity) {
+            mActivity = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case RECV_LOCATION:
+                    screen.append("已接受到路径点信息\n");
+                    break;
+                case TEXT:
+                    Bundle bundle = msg.getData();
+                    if (bundle != null && bundle.containsKey("text")){
+                        String text = bundle.getString("text");
+                        screen.append(text + "\n");
+                    }
+                    break;
+            }
+        }
+    }
 
     private static class VoiceHandler extends Handler {
-
         private final WeakReference<Activity> mActivity;
         public VoiceHandler(Activity activity) {
             mActivity = new WeakReference<>(activity);
@@ -435,9 +535,9 @@ public class NavigationActivity extends Activity {
 
     private final Handler mHandler = new MyHandler(this);
     private final Handler voiceHandler = new VoiceHandler(this);
-    //    public Handler showHandler = new ShowHandler(this);
+    private final Handler showHandler = new ShowHandler(this);
 
-    private class VoiceThread extends Thread{
+    private class VoiceThread extends Thread {
         @Override
         public void run() {
             while (!isDrawStop) {
@@ -451,13 +551,79 @@ public class NavigationActivity extends Activity {
                     message.setData(bundle);
                     voiceHandler.sendMessage(message);
                     try {
-                        Thread.sleep(60000);
+                        Thread.sleep(voiceRate);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }
         }
+    }
+
+    private File getComFile() {
+        File devDir = new File("/dev");
+        if (devDir.isDirectory() && devDir.canRead()) {
+            File[] files = devDir.listFiles();
+            for (File file : files) {
+                if (file.getName().startsWith("ttyUSB")) {
+                    return file;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void baiduLbsSet() {
+        mLocationClient = new LocationClient(this);
+        LocationClientOption mOption = new LocationClientOption();
+        mOption.setOpenGps(true);
+        mOption.setCoorType("bd09ll");
+        mOption.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
+        mOption.setScanSpan(1000);
+
+        mLocationClient.setLocOption(mOption);
+        mLocationClient.registerLocationListener(new BDLocationListener() {
+            @Override
+            public void onReceiveLocation(BDLocation bdLocation) {
+                if (bdLocation == null) {
+                    return;
+                }
+
+                if (bdLocation.getLocType() != 61 && bdLocation.getLocType() != 161) {
+                    return;
+                }
+
+                LocationInfo info = new LocationInfo(bdLocation.getLongitude(), bdLocation.getLatitude());
+                if (!showList.isEmpty()) {
+                    if (showList.size() > 13) {
+                        showList.pollFirst();
+                    }
+                    double lngCount = info.getLng();
+                    double latCount = info.getLat();
+                    for (LocationInfo s : showList) {
+                        lngCount += s.getLng();
+                        latCount += s.getLat();
+                    }
+                    double calLng = lngCount / (showList.size() + 1);
+                    double calLat = latCount / (showList.size() + 1);
+                    LocationInfo s = new LocationInfo(calLng, calLat);
+                    showList.addLast(s);
+                } else {
+                    showList.addLast(info);
+                }
+
+                Message message = new Message();
+                message.what = LNG_LAT;
+                Bundle bundle = new Bundle();
+                bundle.putDouble("longitude", showList.getLast().getLng());
+                bundle.putDouble("latitude", showList.getLast().getLat());
+                message.setData(bundle);
+                mHandler.sendMessage(message);
+                dataTask.setmLocation(showList.getLast());
+            }
+        });
+        mLocationClient.start();
+        mLocationClient.requestLocation();
     }
 
     private static void refreshScreen(String msg) {
@@ -479,11 +645,6 @@ public class NavigationActivity extends Activity {
             Log.d(TAG, "无写文件权限");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     WRITE_EXTERNAL_STORAGE);
-        } else if (ContextCompat.checkSelfPermission(NavigationActivity.this, Manifest.permission.READ_PHONE_STATE)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "无读取手机状态权限");
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE},
-                    READ_PHONE_STATE);
         }
     }
 
@@ -505,13 +666,6 @@ public class NavigationActivity extends Activity {
                     Toast.makeText(this, "未获取手机权限！", Toast.LENGTH_LONG).show();
                 }
                 break;
-            case READ_PHONE_STATE:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "已获取读取手机状态权限");
-                } else {
-                    Toast.makeText(this, "未获取手机权限！", Toast.LENGTH_LONG).show();
-                }
-                break;
         }
     }
 
@@ -523,13 +677,7 @@ public class NavigationActivity extends Activity {
 //            myOrder.stop();
             myOrder = null;
         }
-        if (out != null) {
-            try {
-                out.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+
         if (mLocationClient != null && mLocationClient.isStarted()) {
             mLocationClient.stop();
             mLocationClient = null;
@@ -544,9 +692,5 @@ public class NavigationActivity extends Activity {
             dataTask.setInterrupt(true);
             dataTask = null;
         }
-
-        screen = null;
-        longitude = null;
-        latitude = null;
     }
 }

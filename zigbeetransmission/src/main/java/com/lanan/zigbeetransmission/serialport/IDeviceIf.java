@@ -6,7 +6,7 @@ interface IDeviceIf {
     /**
      * 打开设备
      */
-    void Open(Context context);
+    boolean Open(Context context);
 
     /**
      * 关闭设备

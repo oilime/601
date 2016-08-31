@@ -55,20 +55,16 @@ public class PortClass {
         }
     }
 
-    public void open(Context mContext) {
+    public boolean open(Context mContext) {
         switch (mType) {
             case CDCACM:
-                cdcAcmDevlflImp.Open(mContext);
-                break;
+                return cdcAcmDevlflImp.Open(mContext);
             case CP21:
-                cp21xxDevlflImp.Open(mContext);
-                break;
+                return cp21xxDevlflImp.Open(mContext);
             case FTDI:
-                spftdiDevIfImp.Open(mContext);
-                break;
+                return spftdiDevIfImp.Open(mContext);
             case PROLIFIC:
-                prolificDevIfImp.Open(mContext);
-                break;
+                return prolificDevIfImp.Open(mContext);
             case PORT:
                 try {
                     serialPort = new SerialPort(portFile, baudRate, flags);
@@ -77,8 +73,9 @@ public class PortClass {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                break;
+                return true;
         }
+        return false;
     }
 
     public int read(byte[] dest, @SuppressWarnings("SameParameterValue") int offset, int len) {

@@ -13,5 +13,17 @@
     <string name="close_port">关闭端口</string>
     <string name="longitude">当前经度：</string>
     <string name="latitude">当前纬度：</string>
+    <string name="port_change">串口驱动方式</string>
+    <string name="rate_change">串口发送速率</string>
+    <string name="voice_rate">语音提示时间</string>
+    <string name="status">状态</string>
+    <string name="show_text">当前串口方式:</string>
+    <string name="cdcacm">CDCACM</string>
+    <string name="cp21">CP21</string>
+    <string name="ftdi">FTDI</string>
+    <string name="prolific">PROLIFIC</string>
+    <string name="port">DEVICE</string>
+    <string name="send">发送</string>
+    <string name="recv">接收</string>
 
 </resources>

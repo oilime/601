@@ -20,10 +20,10 @@ public class MyDraw extends View {
 
     private final DecimalFormat decimalFormat = new DecimalFormat("#.000000");
 
-    private final double west = 112.986218;
-    private final double east = 112.998074;
-    private final double north = 28.215455;
-    private final double south = 28.205455;
+    private final double west = 112.988455;
+    private final double east = 113.001845;
+    private final double north = 28.215616;
+    private final double south = 28.208438;
     private final double startX = (west + east) / 2;
     private final double startY = (north + south) / 2;
     private int width;

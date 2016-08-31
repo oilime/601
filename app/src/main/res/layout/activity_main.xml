@@ -8,19 +8,19 @@
 
     <com.lanan.navigation.draw.MyDraw
         android:id="@+id/path"
-        android:layout_width="489dp"
-        android:layout_height="489dp"
+        android:layout_width="450dp"
+        android:layout_height="450dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_margin="10dp" />
 
     <Button
         android:id="@+id/sendlocation"
-        android:layout_width="244dp"
-        android:layout_height="50dp"
-        android:layout_alignStart="@+id/path"
-        android:layout_alignTop="@+id/drawpath"
-        android:text="@string/send_location" />
+        android:layout_width="225dp"
+        android:layout_height="40dp"
+        android:text="@string/send_location"
+        android:layout_below="@+id/sw"
+        android:layout_alignStart="@+id/sw" />
 
     <TextView
         android:id="@+id/nw"
@@ -60,11 +60,11 @@
 
     <Button
         android:id="@+id/drawpath"
-        android:layout_width="244dp"
-        android:layout_height="50dp"
-        android:layout_below="@+id/path"
-        android:layout_toEndOf="@+id/sendlocation"
-        android:text="@string/draw_path" />
+        android:layout_width="225dp"
+        android:layout_height="40dp"
+        android:text="@string/draw_path"
+        android:layout_below="@+id/se"
+        android:layout_toEndOf="@+id/sendlocation" />
 
     <TextView
         android:id="@+id/showtext"
@@ -83,8 +83,8 @@
 
     <Button
         android:id="@+id/recvlocation"
-        android:layout_width="244dp"
-        android:layout_height="50dp"
+        android:layout_width="225dp"
+        android:layout_height="40dp"
         android:layout_alignStart="@+id/sendlocation"
         android:layout_below="@+id/sendlocation"
         android:text="@string/recv_location" />
@@ -103,8 +103,8 @@
 
     <Button
         android:id="@+id/closeport"
-        android:layout_width="244dp"
-        android:layout_height="50dp"
+        android:layout_width="225dp"
+        android:layout_height="40dp"
         android:layout_alignStart="@+id/drawpath"
         android:layout_below="@+id/drawpath"
         android:text="@string/close_port" />
