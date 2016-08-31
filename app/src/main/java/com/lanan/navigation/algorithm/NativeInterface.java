@@ -3,7 +3,7 @@ package com.lanan.navigation.algorithm;
 import com.lanan.navigation.model.Direction;
 import com.lanan.navigation.model.TriRegon;
 
-@SuppressWarnings("JniMissingFunction")
+@SuppressWarnings({"JniMissingFunction", "unused"})
 public class NativeInterface {
 
     static {

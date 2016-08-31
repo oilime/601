@@ -10,6 +10,7 @@ import com.lanan.zigbeetransmission.dataclass.NavigationInfo;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("unused")
 public class DataTask extends Thread {
 
     private LocationInfo mLocation;

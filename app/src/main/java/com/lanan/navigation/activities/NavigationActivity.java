@@ -46,9 +46,9 @@ import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Locale;
 
+@SuppressWarnings("deprecation")
 public class NavigationActivity extends AppCompatActivity {
 
     private MyDraw myDraw;
@@ -75,7 +75,7 @@ public class NavigationActivity extends AppCompatActivity {
     private DataTask dataTask;
     private LocationClient mLocationClient;
     private ArrayList<LocationInfo> locationInfos = new ArrayList<>();
-    private final LinkedList<LocationInfo> showList = new LinkedList<>();
+//    private final LinkedList<LocationInfo> showList = new LinkedList<>();
 
     private static final int SL = 0;
     private static final int RL = 1;
@@ -106,7 +106,7 @@ public class NavigationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SDKInitializer.initialize(getApplicationContext());
-        setContentView(R.layout.huawei);
+        setContentView(R.layout.activity_main);
 
         container = (CoordinatorLayout) this.findViewById(R.id.snack_container);
 
@@ -433,6 +433,7 @@ public class NavigationActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @SuppressWarnings("unused")
     private static class MyHandler extends Handler {
         private final WeakReference<Activity> mActivity;
 
@@ -466,14 +467,24 @@ public class NavigationActivity extends AppCompatActivity {
                             speech.speak("已到达第" + (pos - 1) + "路径点", TextToSpeech.QUEUE_FLUSH, null, null);
                             speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null, null);
                             speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null, null);
+                        } else {
+                            speech.speak("已到达第" + (pos - 1) + "路径点", TextToSpeech.QUEUE_FLUSH, null);
+                            speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null);
+                            speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null);
                         }
                         curPos = pos;
                     }
                     if (yaw) {
                         yawCount++;
-                        refreshScreen("偏航！ ---- " + yawCount + " ----\n偏航！偏航！");
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append("第");
+                        stringBuilder.append(yawCount);
+                        stringBuilder.append("次偏航!");
+                        refreshScreen(stringBuilder + "\n偏航！偏航！");
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             speech.speak("偏航", TextToSpeech.QUEUE_FLUSH, null, null);
+                        } else {
+                            speech.speak("偏航", TextToSpeech.QUEUE_FLUSH, null);
                         }
                     }
                     break;
@@ -487,6 +498,7 @@ public class NavigationActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressWarnings("unused")
     private static class ShowHandler extends Handler {
         private final WeakReference<Activity> mActivity;
 
@@ -511,6 +523,7 @@ public class NavigationActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressWarnings("unused")
     private static class VoiceHandler extends Handler {
         private final WeakReference<Activity> mActivity;
 
@@ -529,6 +542,9 @@ public class NavigationActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null, null);
                 speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null, null);
+            } else {
+                speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null);
+                speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null);
             }
         }
     }
