@@ -13,19 +13,19 @@ import java.util.LinkedList;
 
 public class Order {
 
-    private final byte[] head = new byte[]{(byte) 0xfe, (byte) 0xdd, (byte) 0xdf};    //数据包头
+    private final byte[] head = new byte[]{(byte) 0xfe, (byte) 0xdd, (byte) 0xdf};      //数据包头
     private final byte[] oriLen = new byte[]{0x1a};                                     //a-->b数据包长度:26
-    private final byte[] naviLen = new byte[]{0x23};                                     //b-->c数据包长度:35
+    private final byte[] naviLen = new byte[]{0x23};                                    //b-->c数据包长度:35
     private final byte[] userId = new byte[]{0x01};                                     //用户id
-    private final byte[] startPos = new byte[]{0x24};                                     //起始位
+    private final byte[] startPos = new byte[]{0x24};                                   //起始位
     private final byte[] lngSig = new byte[]{0x20};                                     //标志位，后方数据为经度
     private final byte[] latSig = new byte[]{0x2d};                                     //标志位，后方数据为纬度
-    private final byte[] packageC = new byte[]{0x00};                                     //标志位，后方还有数据包
-    private final byte[] packageO = new byte[]{0x01};                                     //标志位，最后一个数据包
-    private final byte[] distanceSig = new byte[]{0x28};                                     //标志位，后方数据为距离
-    private final byte[] angleSig = new byte[]{0x30};                                     //标志位，后方数据为角度
+    private final byte[] packageC = new byte[]{0x00};                                   //标志位，后方还有数据包
+    private final byte[] packageO = new byte[]{0x01};                                   //标志位，最后一个数据包
+    private final byte[] distanceSig = new byte[]{0x28};                                //标志位，后方数据为距离
+    private final byte[] angleSig = new byte[]{0x30};                                   //标志位，后方数据为角度
     private final byte[] posSig = new byte[]{0x43};                                     //标志位，后方数据为路径点号
-    private final byte[] arriveSig = new byte[]{0x1a};                                     //标志位，后方数据为是否达到
+    private final byte[] arriveSig = new byte[]{0x1a};                                  //标志位，后方数据为是否达到
     private final byte[] yawSig = new byte[]{0x11};                                     //标志位，后方数据为是否偏航
     private byte[] doBuffer = new byte[1024];
 
@@ -37,6 +37,7 @@ public class Order {
     private PortClass port;
 
     public enum Type {SET_ORIGIN, UNPACK_ORIGIN, SET_NAVIGATION, UNPACK_NAVIGATION}
+
     private Type orderType;
 
     private boolean isReadFinished = false;
@@ -51,10 +52,18 @@ public class Order {
     private Thread handleNav;
     private Thread handleOri;
 
+    /**
+     * 默认构造函数
+     */
     public Order() {
         super();
     }
 
+    /**
+     * 测试构造函数
+     *
+     * @param data 规划路径
+     */
     public Order(double[][] data) {
         locationList = new ArrayList<>();
         for (double[] p : data) {
@@ -64,6 +73,12 @@ public class Order {
         this.orderType = Type.SET_ORIGIN;
     }
 
+    /**
+     * 规划路径用构造函数
+     *
+     * @param data 规划路径
+     * @param port 串口类型
+     */
     public Order(double[][] data, PortClass port) {
         this.port = port;
         locationList = new ArrayList<>();
@@ -108,12 +123,25 @@ public class Order {
         }
     }
 
+    /**
+     * 导航用构造函数
+     *
+     * @param info 导航信息
+     * @param port 串口类型
+     */
     public Order(NavigationInfo info, PortClass port) {
         this.port = port;
         this.orderType = Type.SET_NAVIGATION;
         navigationList.add(info);
     }
 
+    /**
+     * 接收信息用构造函数
+     *
+     * @param list 接收列表
+     * @param port 串口类型
+     * @param type 接收消息的类型
+     */
     public Order(ArrayList<SendPackage> list, PortClass port, Type type) {
         this.port = port;
         locationList = new ArrayList<>();
@@ -121,10 +149,18 @@ public class Order {
         this.orderType = type;
     }
 
+    /**
+     * 添加导航信息点
+     *
+     * @param info 待添加的导航信息
+     */
     public void addNavigationPoint(NavigationInfo info) {
         navigationList.add(info);
     }
 
+    /**
+     * 信息组包
+     */
     public boolean setPackage() {
         switch (orderType) {
             case SET_NAVIGATION:
@@ -188,6 +224,9 @@ public class Order {
         return false;
     }
 
+    /**
+     * 信息解包
+     */
     public void getPackage() {
         switch (orderType) {
             case UNPACK_ORIGIN:
@@ -300,6 +339,9 @@ public class Order {
         }
     }
 
+    /**
+     * 信息接收线程
+     */
     private class receiveThread extends Thread {
         @Override
         public void run() {
@@ -321,6 +363,9 @@ public class Order {
         }
     }
 
+    /**
+     * 信息发送线程
+     */
     private class sendThread extends Thread {
         @Override
         public void run() {
@@ -342,6 +387,9 @@ public class Order {
         }
     }
 
+    /**
+     * 导航信息处理线程
+     */
     private class handleThread extends Thread {
         @Override
         public void run() {
@@ -359,6 +407,9 @@ public class Order {
         }
     }
 
+    /**
+     * 路径信息处理线程
+     */
     private class handleOriThread extends Thread {
         @Override
         public void run() {
@@ -381,6 +432,9 @@ public class Order {
         }
     }
 
+    /**
+     * 信息读取
+     */
     public void read() {
         stopAllThread();
         receive = new receiveThread();
@@ -397,6 +451,9 @@ public class Order {
         }
     }
 
+    /**
+     * 信息发送
+     */
     public void write() {
         stopAllThread();
         switch (orderType) {
@@ -420,10 +477,20 @@ public class Order {
         }
     }
 
+    /**
+     * 获取规划路径信息
+     *
+     * @return 规划路径点列表
+     */
     public ArrayList<LocationInfo> getLocationDataList() {
         return locationList;
     }
 
+    /**
+     * 获取实时导航信息
+     *
+     * @return 实时导航信息
+     */
     public NavigationInfo getNavigationInfo() {
         if (!recvNavigationList.isEmpty()) {
             NavigationInfo info = recvNavigationList.getLast();
@@ -434,15 +501,29 @@ public class Order {
             return null;
     }
 
+    /**
+     * 参数设置
+     *
+     * @param port 串口类型
+     * @param type 消息的类型
+     */
     public void setOrder(PortClass port, Type type) {
         this.port = port;
         this.orderType = type;
     }
 
-    public void setSendRate (int rate) {
+    /**
+     * 串口波特率设置
+     *
+     * @param rate 波特率
+     */
+    public void setSendRate(int rate) {
         this.rate = rate;
     }
 
+    /**
+     * 停止所有工作线程
+     */
     private void stopAllThread() {
         if (send != null && send.isAlive()) {
             Log.d("Emilio", "send interrupt");
@@ -466,11 +547,22 @@ public class Order {
         }
     }
 
+    /**
+     * 将串口接收到的信息拷贝至信息处理缓存
+     *
+     * @param buffer 接收用缓存
+     * @param len 待拷贝的信息长度
+     */
     private synchronized void setDoBuffer(byte[] buffer, int len) {
         System.arraycopy(buffer, 0, doBuffer, doCount, len);
         doCount += len;
     }
 
+    /**
+     * 提取信息处理缓存中的有效信息
+     *
+     * @param len 待提取的有效信息长度
+     */
     private synchronized byte[] getDoBuffer(int len) {
         if (doCount < len)
             return null;
@@ -489,6 +581,9 @@ public class Order {
         return null;
     }
 
+    /**
+     * 停止工作，资源释放
+     */
     public void stop() {
         stopAllThread();
         if (this.port != null) {
@@ -503,6 +598,11 @@ public class Order {
         System.gc();
     }
 
+    /**
+     * 获取当前工作状态
+     *
+     * @return 读/写操作是否完成
+     */
     public boolean getStatus() {
         switch (orderType) {
             case SET_ORIGIN:
@@ -515,6 +615,12 @@ public class Order {
         }
     }
 
+    /**
+     * 字节数组转换为整型
+     *
+     * @param b 待转换的字节数组
+     * @return 转换后的整型
+     */
     private int bytes2Int(byte[] b) {
         int i = (b[0] << 24) & 0xFF000000;
         i |= (b[1] << 16) & 0xFF0000;
@@ -523,6 +629,12 @@ public class Order {
         return i;
     }
 
+    /**
+     * 整型转换为字节数组
+     *
+     * @param i 待转换的整型
+     * @return 转换后的字节数组
+     */
     private byte[] int2Bytes(int i) {
         byte[] b = new byte[4];
         b[0] = (byte) (i >>> 24);
@@ -532,10 +644,32 @@ public class Order {
         return b;
     }
 
+    /**
+     * 字节数组转换为double型
+     *
+     * @param b 待转换的字节数组
+     * @return 转换后的double型
+     */
     private double bytes2Double(byte[] b) {
         return Double.longBitsToDouble(bytes2Long(b));
     }
 
+    /**
+     * double型转换为字节数组
+     *
+     * @param d 待转换的double型
+     * @return 转换后的字节数组
+     */
+    private byte[] double2Bytes(double d) {
+        return long2Bytes(Double.doubleToLongBits(d));
+    }
+
+    /**
+     * 字节数组转换为long型
+     *
+     * @param b 待转换的字节数组
+     * @return 转换后的long型
+     */
     private long bytes2Long(byte[] b) {
         long l = ((long) b[0] << 56) & 0xFF00000000000000L;
         l |= ((long) b[1] << 48) & 0xFF000000000000L;
@@ -548,10 +682,12 @@ public class Order {
         return l;
     }
 
-    private byte[] double2Bytes(double d) {
-        return long2Bytes(Double.doubleToLongBits(d));
-    }
-
+    /**
+     * long型转换为字节数组
+     *
+     * @param l 待转换的long型
+     * @return 转换后的字节数组
+     */
     private byte[] long2Bytes(long l) {
         byte[] b = new byte[8];
         b[0] = (byte) (l >>> 56);
@@ -565,6 +701,13 @@ public class Order {
         return b;
     }
 
+    /**
+     * 字节数组求校验和
+     *
+     * @param data 进行校验的字节数组
+     * @param len 进行校验的字节长度
+     * @return 校验和
+     */
     private byte getCrc(byte[] data, int len) {
         byte crc = 0;
         for (int i = 0; i < len; i++) {
@@ -573,6 +716,12 @@ public class Order {
         return crc;
     }
 
+    /**
+     * 字节数组转成16进制字符串显示
+     *
+     * @param buf 待转换的字节数组
+     * @return 转换后的字符串
+     */
     private String parseByte2HexStr(byte[] buf) {
         StringBuilder sb = new StringBuilder();
         for (byte i : buf) {
@@ -585,7 +734,11 @@ public class Order {
         return sb.toString();
     }
 
-    @SuppressWarnings("UnusedReturnValue")
+    /**
+     * 缓存清空
+     *
+     * @param bytes 待清空的缓存
+     */
     private void bufferSet(byte[] bytes) {
         for (int i = 0; i < bytes.length; i++) {
             bytes[i] = 0;

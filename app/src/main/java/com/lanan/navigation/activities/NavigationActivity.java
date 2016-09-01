@@ -2,12 +2,18 @@ package com.lanan.navigation.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
@@ -35,6 +41,7 @@ import com.baidu.mapapi.SDKInitializer;
 import com.lanan.navigation.R;
 import com.lanan.navigation.control.DataTask;
 import com.lanan.navigation.draw.MyDraw;
+import com.lanan.navigation.services.NavigationService;
 import com.lanan.zigbeetransmission.Order;
 import com.lanan.zigbeetransmission.dataclass.LocationInfo;
 import com.lanan.zigbeetransmission.dataclass.NavigationInfo;
@@ -49,7 +56,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 @SuppressWarnings("deprecation")
-public class NavigationActivity extends AppCompatActivity {
+public class NavigationActivity extends AppCompatActivity{
 
     private MyDraw myDraw;
     private CoordinatorLayout container;
@@ -73,6 +80,7 @@ public class NavigationActivity extends AppCompatActivity {
     //    private NavigationInfo nInfo;
     private Order myOrder;
     private DataTask dataTask;
+    private NavigationService navigationService;
     private LocationClient mLocationClient;
     private ArrayList<LocationInfo> locationInfos = new ArrayList<>();
 //    private final LinkedList<LocationInfo> showList = new LinkedList<>();
@@ -105,6 +113,7 @@ public class NavigationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_main);
 
@@ -140,8 +149,27 @@ public class NavigationActivity extends AppCompatActivity {
             public void onInit(int status) {
             }
         });
+
+        this.bindService(new Intent("com.lanan.NavigationService"), this.serviceConnection, BIND_AUTO_CREATE);
     }
 
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            navigationService = ((NavigationService.ServiceBinder)service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            navigationService = null;
+        }
+    };
+
+
+    /**
+     * 初始化Action Bar
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -149,6 +177,9 @@ public class NavigationActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    /**
+     * Action Bar内部设置
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -311,7 +342,7 @@ public class NavigationActivity extends AppCompatActivity {
                         switch (type) {
                             case PORT:
                                 File file = getComFile();
-                                if (file == null){
+                                if (file == null) {
                                     refreshScreen("未找到传输设备文件,传输中止！\n");
                                     return;
                                 }
@@ -346,6 +377,7 @@ public class NavigationActivity extends AppCompatActivity {
                 }).start();
                 break;
             case R.id.start_navigation:
+
                 if (myOrder != null) {
                     myOrder.stop();
                     myOrder = null;
@@ -359,13 +391,9 @@ public class NavigationActivity extends AppCompatActivity {
                     else
                         myDraw.drawNew(infos);
                 }
-                dataTask = new DataTask();
-                dataTask.setDestination(locationInfos);
-                dataTask.start();
 
-                VoiceThread voiceThread = new VoiceThread();
-                voiceThread.start();
-                isDrawStop = false;
+                navigationService.startNav(locationInfos);
+
                 Message message = new Message();
                 message.what = TEXT;
                 Bundle bundle = new Bundle();
@@ -433,6 +461,9 @@ public class NavigationActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * 导航信息处理Handler
+     */
     @SuppressWarnings("unused")
     private static class MyHandler extends Handler {
         private final WeakReference<Activity> mActivity;
@@ -498,6 +529,9 @@ public class NavigationActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 路径规划显示Handler
+     */
     @SuppressWarnings("unused")
     private static class ShowHandler extends Handler {
         private final WeakReference<Activity> mActivity;
@@ -523,6 +557,9 @@ public class NavigationActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 语音提示Handler
+     */
     @SuppressWarnings("unused")
     private static class VoiceHandler extends Handler {
         private final WeakReference<Activity> mActivity;
@@ -553,6 +590,9 @@ public class NavigationActivity extends AppCompatActivity {
     private final Handler voiceHandler = new VoiceHandler(this);
     private final Handler showHandler = new ShowHandler(this);
 
+    /**
+     * 语音导航线程
+     */
     private class VoiceThread extends Thread {
         @Override
         public void run() {
@@ -576,6 +616,9 @@ public class NavigationActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 获取串口设备文件
+     */
     @Nullable
     private File getComFile() {
         File devDir = new File("/dev");
@@ -590,8 +633,14 @@ public class NavigationActivity extends AppCompatActivity {
         return null;
     }
 
+    /**
+     * 百度地图参数设置
+     */
     private void baiduLbsSet() {
-        mLocationClient = new LocationClient(this);
+        mLocationClient = new LocationClient(getApplicationContext());
+        /**
+         * 百度地图设置
+         */
         LocationClientOption mOption = new LocationClientOption();
         mOption.setOpenGps(true);
         mOption.setCoorType("bd09ll");
@@ -610,43 +659,29 @@ public class NavigationActivity extends AppCompatActivity {
                     return;
                 }
 
-//                Log.d(TAG, "" + System.currentTimeMillis());
-
                 LocationInfo info = new LocationInfo(bdLocation.getLongitude(), bdLocation.getLatitude());
-//                if (!showList.isEmpty()) {
-//                    if (showList.size() > 13) {
-//                        showList.pollFirst();
-//                    }
-//                    double lngCount = info.getLng();
-//                    double latCount = info.getLat();
-//                    for (LocationInfo s : showList) {
-//                        lngCount += s.getLng();
-//                        latCount += s.getLat();
-//                    }
-//                    double calLng = lngCount / (showList.size() + 1);
-//                    double calLat = latCount / (showList.size() + 1);
-//                    LocationInfo s = new LocationInfo(calLng, calLat);
-//                    showList.addLast(s);
-//                } else {
-//                    showList.addLast(info);
-//                }
-
                 Message message = new Message();
                 message.what = LNG_LAT;
                 Bundle bundle = new Bundle();
                 bundle.putDouble("longitude", info.getLng());
                 bundle.putDouble("latitude", info.getLat());
-//                bundle.putDouble("longitude", showList.getLast().getLng());
-//                bundle.putDouble("latitude", showList.getLast().getLat());
                 message.setData(bundle);
                 mHandler.sendMessage(message);
-                dataTask.setmLocation(info);
+                if (dataTask != null && !dataTask.isInterrupt()) {
+                    dataTask.setmLocation(info);
+                }
             }
         });
+
         mLocationClient.start();
         mLocationClient.requestLocation();
     }
 
+    /**
+     * TextView文字更新
+     *
+     * @param msg 待更新的文字信息
+     */
     private static void refreshScreen(String msg) {
         screen.append(msg);
         int offset = screen.getLineCount() * screen.getLineHeight();
@@ -655,6 +690,9 @@ public class NavigationActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 权限检查
+     */
     private void PermissionCheck() {
         if (ContextCompat.checkSelfPermission(NavigationActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -669,6 +707,21 @@ public class NavigationActivity extends AppCompatActivity {
         }
     }
 
+    private class NavReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+        }
+    }
+
+    /**
+     * 权限检查的回调函数
+     *
+     * @param requestCode  申请权限时标识的权限id号
+     * @param permissions  所申请的权限
+     * @param grantResults 返回的申请结果
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -690,9 +743,11 @@ public class NavigationActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 资源释放
+     */
     @Override
     protected void onDestroy() throws SecurityException {
-        super.onDestroy();
         isDrawStop = true;
         if (myOrder != null) {
             myOrder.stop();
@@ -713,5 +768,8 @@ public class NavigationActivity extends AppCompatActivity {
             dataTask.setInterrupt(true);
             dataTask = null;
         }
+
+        this.unbindService(serviceConnection);
+        super.onDestroy();
     }
 }

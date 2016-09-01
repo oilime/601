@@ -10,7 +10,6 @@ import com.lanan.zigbeetransmission.dataclass.NavigationInfo;
 
 import java.util.ArrayList;
 
-@SuppressWarnings("unused")
 public class DataTask extends Thread {
 
     private LocationInfo mLocation;
@@ -30,8 +29,8 @@ public class DataTask extends Thread {
         return interrupt;
     }
 
-    public void setInterrupt(@SuppressWarnings("SameParameterValue") boolean interrupt) {
-        this.interrupt = true;
+    public void setInterrupt(boolean interrupt) {
+        this.interrupt = interrupt;
     }
 
     private synchronized LocationInfo getmLocation() {
@@ -46,6 +45,7 @@ public class DataTask extends Thread {
     public void run() {
         LocationInfo location;
         Direction direction;
+        setInterrupt(false);
         while (!interrupt) {
             if (currentL == destination.size()) {
                 break;
@@ -97,6 +97,7 @@ public class DataTask extends Thread {
             setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL + 1,
                     false, false));
         }
+        setInterrupt(true);
         if (currentL == destination.size()) {
             Log.d("Emilio", "arrived");
         }
