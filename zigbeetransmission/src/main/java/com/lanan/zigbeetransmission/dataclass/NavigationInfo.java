@@ -19,23 +19,23 @@ public class NavigationInfo {
         this.yawStatus = yaw;
     }
 
-    public void setDistance (double dis) {
+    public void setDistance(double dis) {
         this.distance = dis;
     }
 
-    public void setAngle (double angle) {
+    public void setAngle(double angle) {
         this.angle = angle;
     }
 
-    public void setPos (int pos) {
+    public void setPos(int pos) {
         this.pos = pos;
     }
 
-    public void setArriveStatus (boolean status) {
+    public void setArriveStatus(boolean status) {
         this.arriveStatus = status;
     }
 
-    public void setYawStatus (boolean status) {
+    public void setYawStatus(boolean status) {
         this.yawStatus = status;
     }
 

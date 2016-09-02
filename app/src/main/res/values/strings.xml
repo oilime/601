@@ -2,5 +2,28 @@
 <resources>
 
     <string name="app_name">导航</string>
+    <string name="nw">NW:</string>
+    <string name="ne">NE:</string>
+    <string name="sw">SW:</string>
+    <string name="se">SE:</string>
+    <string name="draw_path">导航</string>
+    <string name="send_location">发送离散路径点</string>
+    <string name="recv_location">接收离散路径点</string>
+    <string name="show_information">信息显示</string>
+    <string name="close_port">关闭端口</string>
+    <string name="longitude">当前经度：</string>
+    <string name="latitude">当前纬度：</string>
+    <string name="port_change">串口驱动方式</string>
+    <string name="rate_change">串口发送速率</string>
+    <string name="voice_rate">语音提示时间</string>
+    <string name="status">状态</string>
+    <string name="show_text">当前串口方式:</string>
+    <string name="cdcacm">CDCACM</string>
+    <string name="cp21">CP21</string>
+    <string name="ftdi">FTDI</string>
+    <string name="prolific">PROLIFIC</string>
+    <string name="port">DEVICE</string>
+    <string name="send">发送</string>
+    <string name="recv">接收</string>
 
 </resources>

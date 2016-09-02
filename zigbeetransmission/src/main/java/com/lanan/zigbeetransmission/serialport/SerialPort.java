@@ -1,5 +1,7 @@
 package com.lanan.zigbeetransmission.serialport;
 
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -8,20 +10,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import android.util.Log;
-
+@SuppressWarnings("JniMissingFunction")
 public class SerialPort {
 
-	private static final String TAG = "SerialPort";
+    static {
+        System.loadLibrary("serial_port");
+    }
 
-	/*
-	 * Do not remove or rename the field mFd: it is used by native method close();
-	 */
-	private FileDescriptor mFd;
-	private FileInputStream mFileInputStream;
-	private FileOutputStream mFileOutputStream;
+    private static final String TAG = "SerialPort";
 
-	public SerialPort(File device, int baudRate, int flags) throws SecurityException, IOException {
+    /*
+     * Do not remove or rename the field mFd: it is used by native method close();
+     */
+    @SuppressWarnings({"CanBeFinal", "FieldCanBeLocal"})
+    private FileDescriptor mFd;
+    private FileInputStream mFileInputStream;
+    private FileOutputStream mFileOutputStream;
+
+    public SerialPort(File device, int baudRate, int flags) throws SecurityException, IOException {
 
 		/* Check access permission */
 //		if (!device.canRead() || !device.canWrite()) {
@@ -43,30 +49,27 @@ public class SerialPort {
 //			}
 //		}
 
-		Log.e("tag","*"+ device.getAbsolutePath());
-		mFd = open(device.getAbsolutePath(), baudRate, flags);
-		if (mFd == null) {
-			Log.e(TAG, "native open returns null");
-			throw new IOException();
-		}
-		mFileInputStream = new FileInputStream(mFd);
-		mFileOutputStream = new FileOutputStream(mFd);
-	}
+        Log.e("tag", "*" + device.getAbsolutePath());
+        mFd = open(device.getAbsolutePath(), baudRate, flags);
+        if (mFd == null) {
+            Log.e(TAG, "native open returns null");
+            throw new IOException();
+        }
+        mFileInputStream = new FileInputStream(mFd);
+        mFileOutputStream = new FileOutputStream(mFd);
+    }
 
-	// Getters and setters
-	public InputStream getInputStream() {
-		return mFileInputStream;
-	}
+    // Getters and setters
+    public InputStream getInputStream() {
+        return mFileInputStream;
+    }
 
-	public OutputStream getOutputStream() {
-		return mFileOutputStream;
-	}
+    public OutputStream getOutputStream() {
+        return mFileOutputStream;
+    }
 
-	// JNI
-	private native static FileDescriptor open(String path, int baudrate, int flags);
-	public native void close();
-	
-	static {
-		System.loadLibrary("serial_port");
-	}
+    // JNI
+    private native static FileDescriptor open(String path, int baudrate, int flags);
+
+    public native void close();
 }

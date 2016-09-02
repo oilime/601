@@ -1,10 +1,8 @@
+<<<<<<< HEAD
 # Created by .ignore support plugin (hsz.mobi)
 # Built application files
 *.apk
 *.ap_
-
-# Files for the ART/Dalvik VM
-*.dex
 
 # Java class files
 *.class
@@ -33,16 +31,12 @@ proguard/
 # Android Studio captures folder
 captures/
 
-# Intellij
 *.iml
 .idea/workspace.xml
 .idea/libraries
 
 # Keystore files
 *.jks
-将删除 .gradle/2.10/tasks/_app_compileReleaseJavaWithJavac/
-将删除 .idea/workspace.xml
-将删除 app/app-release.apk
-将删除 app/build/
-将删除 build/generated/mockable-android-23.jar
-将删除 zigbeetransmission/src/main/res/drawable/
+/app/src/main/res/drawable-xxhdpi/
+/app/libs/
+/app/build/

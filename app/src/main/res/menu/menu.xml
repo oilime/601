@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/port_change"
+        android:title="@string/port_change"
+        android:icon="@drawable/com"
+        app:showAsAction="never"/>
+    <item android:id="@+id/rate_change"
+        android:title="@string/rate_change"
+        android:icon="@drawable/rate"
+        app:showAsAction="never"/>
+    <item android:id="@+id/voice_rate"
+        android:title="@string/voice_rate"
+        android:icon="@drawable/voice"
+        app:showAsAction="never"/>
+    <item android:id="@+id/send"
+        android:title="@string/send"
+        app:showAsAction="ifRoom"/>
+    <item android:id="@+id/recv"
+        android:title="@string/recv"
+        app:showAsAction="ifRoom"/>
+    <item android:id="@+id/start_navigation"
+        android:title="@string/draw_path"
+        app:showAsAction="ifRoom"/>
+    <item android:id="@+id/close"
+        android:title="@string/close_port"
+        app:showAsAction="ifRoom"/>
+</menu>  

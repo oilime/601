@@ -16,7 +16,7 @@ public class PortClass {
 
     public enum portType {CDCACM, CP21, FTDI, PROLIFIC, PORT}
 
-    private portType mType;
+    private final portType mType;
     private static SPCdcAcmDevlflImp cdcAcmDevlflImp;
     private static SPCp21xxDevlflImp cp21xxDevlflImp;
     private static SPFTDIDevIfImp spftdiDevIfImp;
@@ -55,33 +55,30 @@ public class PortClass {
         }
     }
 
-    public void open(Context mContext) {
+    public boolean open(Context mContext) {
         switch (mType) {
             case CDCACM:
-                cdcAcmDevlflImp.Open(mContext);
-                break;
+                return cdcAcmDevlflImp.Open(mContext);
             case CP21:
-                cp21xxDevlflImp.Open(mContext);
-                break;
+                return cp21xxDevlflImp.Open(mContext);
             case FTDI:
-                spftdiDevIfImp.Open(mContext);
-                break;
+                return spftdiDevIfImp.Open(mContext);
             case PROLIFIC:
-                prolificDevIfImp.Open(mContext);
-                break;
+                return prolificDevIfImp.Open(mContext);
             case PORT:
                 try {
                     serialPort = new SerialPort(portFile, baudRate, flags);
                     in = serialPort.getInputStream();
                     out = serialPort.getOutputStream();
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                break;
+                return true;
         }
+        return false;
     }
 
-    public int read(byte[] dest, int offset, int len) {
+    public int read(byte[] dest, @SuppressWarnings("SameParameterValue") int offset, int len) {
         switch (mType) {
             case CDCACM:
                 return cdcAcmDevlflImp.Read(dest, offset, len);
@@ -94,7 +91,7 @@ public class PortClass {
             case PORT:
                 try {
                     return in.read(dest, offset, len);
-                }catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             default:
@@ -102,7 +99,8 @@ public class PortClass {
         }
     }
 
-    public int write(byte[] buf, int offset, int len) {
+    @SuppressWarnings("UnusedReturnValue")
+    public int write(byte[] buf, @SuppressWarnings("SameParameterValue") int offset, int len) {
         switch (mType) {
             case CDCACM:
                 return cdcAcmDevlflImp.Write(buf, offset, len);
@@ -116,7 +114,7 @@ public class PortClass {
                 try {
                     out.write(buf, offset, len);
                     out.flush();
-                }catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     return -1;
                 }

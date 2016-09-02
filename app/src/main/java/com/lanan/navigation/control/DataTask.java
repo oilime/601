@@ -4,68 +4,65 @@ import android.util.Log;
 
 import com.lanan.navigation.algorithm.NativeInterface;
 import com.lanan.navigation.model.Direction;
-import com.lanan.navigation.model.TriRegion;
+import com.lanan.navigation.model.TriRegon;
 import com.lanan.zigbeetransmission.dataclass.LocationInfo;
 import com.lanan.zigbeetransmission.dataclass.NavigationInfo;
 
 import java.util.ArrayList;
 
 public class DataTask extends Thread {
-	
-	private LocationInfo mLocation;
-	private TriRegion triRegion;
-	private ArrayList<LocationInfo> destination;
-	private int currentL = 0;
-	private boolean initFlag = true;
+
+    private LocationInfo mLocation;
+    private TriRegon triRegion;
+    private ArrayList<LocationInfo> destination;
+    private int currentL = 0;
+    private boolean initFlag = true;
     private boolean interrupt = false;
 
     private NavigationInfo info;
 
-    public ArrayList<LocationInfo> getDestination() {
-		return destination;
-	}
-    
-	public void setDestination(ArrayList<LocationInfo> destination) {
-		this.destination = destination;
-	}
-    
-	public boolean isInterrupt() {
-		return interrupt;
-	}
+    public void setDestination(ArrayList<LocationInfo> destination) {
+        this.destination = destination;
+    }
 
-	public void setInterrupt(boolean interrupt) {
-		this.interrupt = interrupt;
-	}
-    
-	private   synchronized LocationInfo getmLocation() {
-		return mLocation;
-	}
-	public  synchronized  void setmLocation(LocationInfo mLocation) {
-		this.mLocation = mLocation;
-	}
-    
-	@Override
-	public void run() {
-	    LocationInfo location ;
+    public boolean isInterrupt() {
+        return interrupt;
+    }
+
+    public void setInterrupt(boolean interrupt) {
+        this.interrupt = interrupt;
+    }
+
+    private synchronized LocationInfo getmLocation() {
+        return mLocation;
+    }
+
+    public synchronized void setmLocation(LocationInfo mLocation) {
+        this.mLocation = mLocation;
+    }
+
+    @Override
+    public void run() {
+        LocationInfo location;
         Direction direction;
-		while(!interrupt){
-	        if(currentL == destination.size()){
-			    break;
-		    }
+        setInterrupt(false);
+        while (!interrupt) {
+            if (currentL == destination.size()) {
+                break;
+            }
 
-            while((location = getmLocation()) == null){
-                Log.e("sqh","location is null");
+            while ((location = getmLocation()) == null) {
                 try {
-                    Thread.sleep(500);
-                }catch (Exception e) {
+                    Thread.sleep(1000);
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-            if(initFlag){
+            if (initFlag) {
                 triRegion = null;
                 triRegion = NativeInterface.gen(location.getLng(), location.getLat(),
                         destination.get(currentL).getLng(), destination.get(currentL).getLat());
-                while(triRegion == null){
+                while (triRegion == null) {
                     try {
                         sleep(100);
                     } catch (InterruptedException e) {
@@ -78,16 +75,20 @@ public class DataTask extends Thread {
             }
             direction = NativeInterface.nav(location.getLng(), location.getLat(),
                     destination.get(currentL).getLng(), destination.get(currentL).getLat());
-            if(direction.getDis() <=  NativeInterface.LIMIT_REGEN){
+            if (direction.getDis() <= NativeInterface.LIMIT_REGEN  /*||
+                    ((currentL < destination.size() - 1) &&
+                            (NativeInterface.rch2(location.getLng(), location.getLat(),
+                                    destination.get(currentL).getLng(), destination.get(currentL).getLat(),
+                                    destination.get(currentL + 1).getLng(), destination.get(currentL).getLat())))*/) {
                 currentL++;
                 initFlag = true;
                 setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL + 1,
                         true, false));
                 continue;
             }
-            if(!NativeInterface.rck(location.getLng(), location.getLat(), triRegion.getmA().getLng(), triRegion.getmA().getLat(),
+            if (!NativeInterface.rck(location.getLng(), location.getLat(), triRegion.getmA().getLng(), triRegion.getmA().getLat(),
                     triRegion.getmB().getLng(), triRegion.getmB().getLat(),
-                    triRegion.getmO().getLng(), triRegion.getmO().getLat())){
+                    triRegion.getmO().getLng(), triRegion.getmO().getLat())) {
                 initFlag = true;
                 setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL + 1,
                         false, true));
@@ -96,19 +97,20 @@ public class DataTask extends Thread {
             setInfo(new NavigationInfo(direction.getDis(), direction.getAngle(), currentL + 1,
                     false, false));
         }
-        if (currentL == destination.size()){
+        setInterrupt(true);
+        if (currentL == destination.size()) {
             Log.d("Emilio", "arrived");
         }
     }
 
     public NavigationInfo getInfo() {
-        synchronized (this.getClass()){
+        synchronized (this.getClass()) {
             return info;
         }
-
     }
-    private void setInfo (NavigationInfo ofni) {
-        synchronized (this.getClass()){
+
+    private void setInfo(NavigationInfo ofni) {
+        synchronized (this.getClass()) {
             this.info = ofni;
         }
     }

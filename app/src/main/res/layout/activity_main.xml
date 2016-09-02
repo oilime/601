@@ -3,176 +3,120 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.MainActivity"
-    tools:ignore="MergeRootFrame">
+    tools:context=".activities.NavigationActivity"
+    tools:ignore="MergeRootFrame,UnusedResources">
 
     <com.lanan.navigation.draw.MyDraw
-        originX="112.992146"
-        originY="28.210455"
-        w="112.987146"
-        e="112.997146"
-        n="28.215455"
-        s="28.205455"
-        android:layout_width="900px"
-        android:layout_height="900px"
         android:id="@+id/path"
-        android:layout_alignParentTop="true"
+        android:layout_width="600dp"
+        android:layout_height="match_parent"
         android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
         android:layout_margin="10dp" />
 
-    <Button
-        android:layout_width="300px"
-        android:layout_height="90px"
-        android:text="发送离散路径点"
-        android:id="@+id/sendlocation"
-        android:layout_alignTop="@+id/drawpath"
-        android:layout_alignStart="@+id/path" />
-
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="NW:"
         android:id="@+id/nw"
-        android:textColor="#ffffff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignStart="@+id/path"
-        android:layout_alignTop="@+id/path" />
+        android:layout_alignTop="@+id/path"
+        android:text="@string/nw"
+        android:textColor="#ffffff" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="NE:"
         android:id="@+id/ne"
-        android:textColor="#ffffff"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/path"
-        android:layout_alignTop="@+id/path" />
+        android:layout_alignTop="@+id/path"
+        android:text="@string/ne"
+        android:textColor="#ffffff" />
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="SW:"
         android:id="@+id/sw"
-        android:textColor="#ffffff"
-        android:layout_alignBottom="@+id/path"
-        android:layout_alignStart="@+id/path" />
-
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SE:"
-        android:id="@+id/se"
-        android:textColor="#ffffff"
         android:layout_alignBottom="@+id/path"
-        android:layout_alignEnd="@+id/path" />
-
-    <Button
-        android:layout_width="300px"
-        android:layout_height="90px"
-        android:text="绘制路径"
-        android:id="@+id/drawpath"
-        android:layout_below="@+id/path"
-        android:layout_toEndOf="@+id/sendlocation" />
+        android:layout_alignStart="@+id/path"
+        android:text="@string/sw"
+        android:textColor="#ffffff" />
 
     <TextView
+        android:id="@+id/se"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/path"
+        android:layout_alignEnd="@+id/path"
+        android:text="@string/se"
+        android:textColor="#ffffff" />
+
+    <TextView
+        android:id="@+id/showtext"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/showtext"
-        android:background="#000000"
-        android:textColor="#ffffff"
-        android:layout_below="@+id/textView"
         android:layout_alignStart="@+id/textView"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
+        android:layout_below="@+id/textView"
         android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
+        android:background="#000000"
+        android:fadeScrollbars="false"
         android:scrollbars="vertical"
-        android:fadeScrollbars="false"/>
-
-    <Button
-        android:layout_width="300px"
-        android:layout_height="90px"
-        android:text="接收导航数据"
-        android:id="@+id/recvnavigation"
-        android:layout_alignTop="@+id/recvlocation"
-        android:layout_alignStart="@+id/sendnavigation" />
-
-    <Button
-        android:layout_width="300px"
-        android:layout_height="90px"
-        android:text="发送导航数据"
-        android:id="@+id/sendnavigation"
-        android:layout_below="@+id/path"
-        android:layout_toEndOf="@+id/drawpath" />
-
-    <Button
-        android:layout_width="300px"
-        android:layout_height="90px"
-        android:text="接收离散路径点"
-        android:id="@+id/recvlocation"
-        android:layout_below="@+id/sendlocation"
-        android:layout_toStartOf="@+id/drawpath" />
+        android:textColor="#ffffff"
+        android:textSize="12sp" />
 
     <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="信息显示"
-        android:id="@+id/textView"
-        android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/path"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
+        android:layout_toEndOf="@+id/path"
+        android:text="@string/show_information"
         android:textSize="20sp" />
 
-    <Button
-        android:layout_width="300px"
-        android:layout_height="90px"
-        android:text="关闭端口"
-        android:id="@+id/closeport"
-        android:layout_alignBottom="@+id/recvnavigation"
-        android:layout_alignStart="@+id/drawpath" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="开始获取gps"
-        android:id="@+id/gps"
-        android:layout_below="@+id/recvnavigation"
-        android:layout_alignEnd="@+id/recvnavigation"
-        android:layout_alignStart="@+id/recvnavigation" />
-
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="经度:"
         android:id="@+id/lng"
-        android:layout_alignTop="@+id/gps"
-        android:layout_alignStart="@+id/recvlocation"
-        android:textSize="20sp"
-        android:layout_marginTop="2dp" />
-
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="纬度:"
+        android:layout_alignStart="@+id/textView"
+        android:layout_alignTop="@+id/textView"
+        android:layout_marginStart="101dp"
+        android:text="@string/longitude"
+        android:textSize="12sp" />
+
+    <TextView
         android:id="@+id/lat"
-        android:layout_below="@+id/lng"
-        android:layout_alignStart="@+id/lng"
-        android:textSize="20sp" />
-
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/lng"
+        android:layout_below="@+id/lng"
+        android:text="@string/latitude"
+        android:textSize="12sp" />
+
+    <TextView
         android:id="@+id/longitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignTop="@+id/lng"
         android:layout_toEndOf="@+id/lng"
-        android:textSize="20sp" />
+        android:textSize="12sp" />
 
     <TextView
+        android:id="@+id/latitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/latitude"
-        android:textSize="20sp"
+        android:layout_alignStart="@+id/longitude"
         android:layout_below="@+id/longitude"
-        android:layout_alignStart="@+id/longitude" />
+        android:textSize="12sp" />
+
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/snack_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>
 

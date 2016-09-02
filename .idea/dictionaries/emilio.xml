@@ -2,6 +2,7 @@
   <dictionary name="emilio">
     <words>
       <w>cdcacm</w>
+      <w>closeport</w>
       <w>devlfl</w>
       <w>drawpath</w>
       <w>getm</w>
@@ -9,10 +10,13 @@
       <w>navi</w>
       <w>navnostar</w>
       <w>recvlocation</w>
+      <w>recvnavigation</w>
       <w>rnav</w>
       <w>sendlocation</w>
+      <w>sendnavigation</w>
       <w>serialport</w>
       <w>setm</w>
+      <w>showtext</w>
       <w>spftdi</w>
     </words>
   </dictionary>
