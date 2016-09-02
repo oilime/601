@@ -7,10 +7,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -39,7 +39,6 @@ import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.SDKInitializer;
 import com.lanan.navigation.R;
-import com.lanan.navigation.control.DataTask;
 import com.lanan.navigation.draw.MyDraw;
 import com.lanan.navigation.services.NavigationService;
 import com.lanan.zigbeetransmission.Order;
@@ -55,35 +54,34 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
-@SuppressWarnings("deprecation")
-public class NavigationActivity extends AppCompatActivity{
-
-    private MyDraw myDraw;
-    private CoordinatorLayout container;
+public class NavigationActivity extends AppCompatActivity {
 
     private static TextView screen;
     private static TextView longitude;
     private static TextView latitude;
-//  /* 海东青 ---> 往西 ---> 烈士公园西门 ---> 烈士公园南门 ---> 海东青 */
-//    private final double[][] data = {{112.992146, 28.210455}, {112.992538,28.21043},
+
+//    /**
+//     * 路径：海东青 ---> 往西 ---> 烈士公园西门 ---> 烈士公园南门 ---> 海东青
+//     */
+//    private final double[][] data1 = {{112.992146, 28.210455}, {112.992538,28.21043},
 //            {112.99274,28.21384}, {112.988868,28.214198}, {112.98885,28.214421},
 //            {112.992776,28.214086}, {112.993234,28.214055}, {112.997968,28.213482},
 //            {112.998148,28.21458}, {112.999747,28.21458}, {112.999396,28.209455},
 //            {112.993674,28.209391}, {112.992291,28.209455}, {112.992146, 28.210455}};
 
-    /* 海东青 ---> 烈士公园 */
+    /**
+     * 路径：海东青 ---> 烈士公园
+     */
     private final double[][] data = {{112.992146, 28.210455}, {112.992538, 28.21043}, {112.99274, 28.21384},
             {112.997968, 28.213482}, {112.998148, 28.21458}, {112.999747, 28.21458}};
 
     private boolean isDrawStop;
-
-    //    private NavigationInfo nInfo;
     private Order myOrder;
-    private DataTask dataTask;
-    private NavigationService navigationService;
+    private MyDraw myDraw;
+    private CoordinatorLayout container;
     private LocationClient mLocationClient;
     private ArrayList<LocationInfo> locationInfos = new ArrayList<>();
-//    private final LinkedList<LocationInfo> showList = new LinkedList<>();
+    private ScreenBroadcastReceiver mScreenReceiver = new ScreenBroadcastReceiver();
 
     private static final int SL = 0;
     private static final int RL = 1;
@@ -99,23 +97,23 @@ public class NavigationActivity extends AppCompatActivity{
     private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
     private static final DecimalFormat normalFormat = new DecimalFormat("#.00");
     private static final DecimalFormat lngFormat = new DecimalFormat("#.000000");
+
     private static PortClass.portType type = PortClass.portType.PORT;
     private static int rate = 2000;
-    private static int voiceRate = 30000;
     private static int curPos = 1;
     private static int curMode = 0;
     private static int curRate = 0;
     private static int curVoiceRate = 0;
     private static int yawCount = 0;
 
-    private static TextToSpeech speech;
+    private static NavigationService navigationService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         SDKInitializer.initialize(getApplicationContext());
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.huawei);
 
         container = (CoordinatorLayout) this.findViewById(R.id.snack_container);
 
@@ -132,7 +130,6 @@ public class NavigationActivity extends AppCompatActivity{
         screen = (TextView) this.findViewById(R.id.showtext);
         screen.setMovementMethod(ScrollingMovementMethod.getInstance());
 
-        baiduLbsSet();
         TextView nw = (TextView) this.findViewById(R.id.nw);
         TextView ne = (TextView) this.findViewById(R.id.ne);
         TextView sw = (TextView) this.findViewById(R.id.sw);
@@ -143,29 +140,32 @@ public class NavigationActivity extends AppCompatActivity{
         se.append(myDraw.getParam(MyDraw.location.EAST) + ", " + myDraw.getParam(MyDraw.location.SOUTH));
 
         PermissionCheck();
+        baiduLbsSet();
 
-        speech = new TextToSpeech(NavigationActivity.this, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-            }
-        });
+        Intent intent = new Intent(this, NavigationService.class);
+        this.bindService(intent, this.serviceConnection, BIND_AUTO_CREATE);
 
-        this.bindService(new Intent("com.lanan.NavigationService"), this.serviceConnection, BIND_AUTO_CREATE);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        this.registerReceiver(mScreenReceiver, filter);
     }
 
+    /**
+     * 服务绑定连接
+     */
     private ServiceConnection serviceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            navigationService = ((NavigationService.ServiceBinder)service).getService();
+            navigationService = ((NavigationService.ServiceBinder) service).getService();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            navigationService.close();
             navigationService = null;
         }
     };
-
 
     /**
      * 初始化Action Bar
@@ -184,6 +184,10 @@ public class NavigationActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.port_change:
+                /**
+                 * 设置串口通信方式
+                 */
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(NavigationActivity.this);
                 builder.setTitle("请选择串口通信方式");
                 final String[] portList = {"设备文件方式", "CDCACM", "CP21", "FTDI", "PROLIFIC"};
@@ -217,6 +221,10 @@ public class NavigationActivity extends AppCompatActivity{
                 builder.show();
                 break;
             case R.id.rate_change:
+                /**
+                 * 设置串口信息发送速率
+                 */
+
                 AlertDialog.Builder rateBuilder = new AlertDialog.Builder(NavigationActivity.this);
                 rateBuilder.setTitle("请选择串口发送速率");
                 final String[] rateList = {"2000ms", "1000ms", "500ms", "100ms"};
@@ -247,6 +255,10 @@ public class NavigationActivity extends AppCompatActivity{
                 rateBuilder.show();
                 break;
             case R.id.voice_rate:
+                /**
+                 * 设置导航语音播报速率
+                 */
+
                 AlertDialog.Builder voiceBuilder = new AlertDialog.Builder(NavigationActivity.this);
                 voiceBuilder.setTitle("请选择语音导航播报速率");
                 final String[] voiceRateList = {"30s", "60s", "90s", "15s"};
@@ -256,16 +268,16 @@ public class NavigationActivity extends AppCompatActivity{
                         curVoiceRate = which;
                         switch (which) {
                             case 0:
-                                NavigationActivity.voiceRate = 30000;
+                                navigationService.setVoiceRate(30);
                                 break;
                             case 1:
-                                NavigationActivity.voiceRate = 60000;
+                                navigationService.setVoiceRate(60);
                                 break;
                             case 2:
-                                NavigationActivity.voiceRate = 90000;
+                                navigationService.setVoiceRate(90);
                                 break;
                             case 3:
-                                NavigationActivity.voiceRate = 15000;
+                                navigationService.setVoiceRate(15);
                                 break;
                         }
                         Snackbar snackbar = Snackbar.make(container, "当前语音播报速率为：" + voiceRateList[which], Snackbar.LENGTH_SHORT);
@@ -277,6 +289,10 @@ public class NavigationActivity extends AppCompatActivity{
                 voiceBuilder.show();
                 break;
             case R.id.send:
+                /**
+                 * 发送路径信息
+                 */
+
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -329,6 +345,10 @@ public class NavigationActivity extends AppCompatActivity{
                 }).start();
                 break;
             case R.id.recv:
+                /**
+                 * 接收路径信息
+                 */
+
                 refreshScreen("start to recv...\n");
                 new Thread(new Runnable() {
                     @Override
@@ -377,6 +397,9 @@ public class NavigationActivity extends AppCompatActivity{
                 }).start();
                 break;
             case R.id.start_navigation:
+                /**
+                 * 开始导航
+                 */
 
                 if (myOrder != null) {
                     myOrder.stop();
@@ -391,23 +414,26 @@ public class NavigationActivity extends AppCompatActivity{
                     else
                         myDraw.drawNew(infos);
                 }
-
                 navigationService.startNav(locationInfos);
 
-                Message message = new Message();
-                message.what = TEXT;
-                Bundle bundle = new Bundle();
-                bundle.putString("text", "导航开始");
-                showHandler.sendMessage(message);
+                Message startMessage = new Message();
+                startMessage.what = TEXT;
+                Bundle startBundle = new Bundle();
+                startBundle.putString("text", "导航开始");
+                startMessage.setData(startBundle);
+                showHandler.sendMessage(startMessage);
 
+                navigationService.mSpeak("导航开始", TextToSpeech.QUEUE_FLUSH);
+
+                isDrawStop = false;
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         while (!isDrawStop) {
-                            NavigationInfo info = dataTask.getInfo();
+                            NavigationInfo info = navigationService.getNavInfo();
                             if (info != null) {
                                 if (info.isArrived()) {
-                                    dataTask.setInterrupt(true);
+                                    navigationService.stopNav();
                                     isDrawStop = true;
                                     break;
                                 }
@@ -437,15 +463,19 @@ public class NavigationActivity extends AppCompatActivity{
                 }).start();
                 break;
             case R.id.close:
+                /**
+                 * 停止导航
+                 */
+
                 if (myOrder != null) {
                     myOrder.stop();
                     myOrder = null;
                 }
                 isDrawStop = true;
 
-                if (dataTask != null && dataTask.isAlive()) {
-                    dataTask.setInterrupt(true);
-                    dataTask = null;
+                if (!navigationService.isNavStop()) {
+                    navigationService.mSpeak("导航结束", TextToSpeech.QUEUE_FLUSH);
+                    navigationService.stopNav();
                 }
 
                 Message clMessage = new Message();
@@ -459,6 +489,21 @@ public class NavigationActivity extends AppCompatActivity{
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * 锁屏广播接收
+     */
+    private class ScreenBroadcastReceiver extends BroadcastReceiver {
+        private String action = null;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            action = intent.getAction();
+            if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                navigationService.mSpeak("锁屏期间将持续导航", TextToSpeech.QUEUE_FLUSH);
+            }
+        }
     }
 
     /**
@@ -494,15 +539,9 @@ public class NavigationActivity extends AppCompatActivity{
                     if (pos > curPos) {
                         int a = Double.valueOf(dis).intValue();
                         int b = Double.valueOf(angle).intValue();
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            speech.speak("已到达第" + (pos - 1) + "路径点", TextToSpeech.QUEUE_FLUSH, null, null);
-                            speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null, null);
-                            speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null, null);
-                        } else {
-                            speech.speak("已到达第" + (pos - 1) + "路径点", TextToSpeech.QUEUE_FLUSH, null);
-                            speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null);
-                            speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null);
-                        }
+                        navigationService.mSpeak("已到达第" + (pos - 1) + "路径点", TextToSpeech.QUEUE_FLUSH);
+                        navigationService.mSpeak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD);
+                        navigationService.mSpeak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD);
                         curPos = pos;
                     }
                     if (yaw) {
@@ -512,11 +551,7 @@ public class NavigationActivity extends AppCompatActivity{
                         stringBuilder.append(yawCount);
                         stringBuilder.append("次偏航!");
                         refreshScreen(stringBuilder + "\n偏航！偏航！");
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            speech.speak("偏航", TextToSpeech.QUEUE_FLUSH, null, null);
-                        } else {
-                            speech.speak("偏航", TextToSpeech.QUEUE_FLUSH, null);
-                        }
+                        navigationService.mSpeak("偏航", TextToSpeech.QUEUE_FLUSH);
                     }
                     break;
                 case LNG_LAT:
@@ -557,64 +592,8 @@ public class NavigationActivity extends AppCompatActivity{
         }
     }
 
-    /**
-     * 语音提示Handler
-     */
-    @SuppressWarnings("unused")
-    private static class VoiceHandler extends Handler {
-        private final WeakReference<Activity> mActivity;
-
-        public VoiceHandler(Activity activity) {
-            mActivity = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message message) {
-            Bundle bundle = message.getData();
-            double dis = bundle.getDouble("distance");
-            int a = Double.valueOf(dis).intValue();
-            double angle = bundle.getDouble("angle");
-            int b = Double.valueOf(angle).intValue();
-            int pos = bundle.getInt("pos");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null, null);
-                speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null, null);
-            } else {
-                speech.speak("距离第" + pos + "路径点" + a + "米", TextToSpeech.QUEUE_ADD, null);
-                speech.speak("方位角为" + b + "度", TextToSpeech.QUEUE_ADD, null);
-            }
-        }
-    }
-
     private final Handler mHandler = new MyHandler(this);
-    private final Handler voiceHandler = new VoiceHandler(this);
     private final Handler showHandler = new ShowHandler(this);
-
-    /**
-     * 语音导航线程
-     */
-    private class VoiceThread extends Thread {
-        @Override
-        public void run() {
-            while (!isDrawStop) {
-                NavigationInfo info = dataTask.getInfo();
-                if (info != null) {
-                    Message message = new Message();
-                    Bundle bundle = new Bundle();
-                    bundle.putDouble("distance", info.getDistance());
-                    bundle.putDouble("angle", info.getAngle());
-                    bundle.putInt("pos", info.getPos());
-                    message.setData(bundle);
-                    voiceHandler.sendMessage(message);
-                    try {
-                        Thread.sleep(voiceRate);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
 
     /**
      * 获取串口设备文件
@@ -667,8 +646,8 @@ public class NavigationActivity extends AppCompatActivity{
                 bundle.putDouble("latitude", info.getLat());
                 message.setData(bundle);
                 mHandler.sendMessage(message);
-                if (dataTask != null && !dataTask.isInterrupt()) {
-                    dataTask.setmLocation(info);
+                if (navigationService != null) {
+                    navigationService.setLocInfo(info);
                 }
             }
         });
@@ -707,14 +686,6 @@ public class NavigationActivity extends AppCompatActivity{
         }
     }
 
-    private class NavReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-        }
-    }
-
     /**
      * 权限检查的回调函数
      *
@@ -744,7 +715,7 @@ public class NavigationActivity extends AppCompatActivity{
     }
 
     /**
-     * 资源释放
+     * 资源释放，服务停止，广播接收注销
      */
     @Override
     protected void onDestroy() throws SecurityException {
@@ -759,17 +730,8 @@ public class NavigationActivity extends AppCompatActivity{
             mLocationClient = null;
         }
 
-        if (speech != null) {
-            speech.stop();
-            speech.shutdown();
-        }
-
-        if (dataTask != null && dataTask.isAlive()) {
-            dataTask.setInterrupt(true);
-            dataTask = null;
-        }
-
         this.unbindService(serviceConnection);
+        this.unregisterReceiver(mScreenReceiver);
         super.onDestroy();
     }
 }

@@ -13,7 +13,13 @@ public interface ServiceInterface {
 
     void setVoiceRate(int voiceRate);
 
-    void setNavRate(int navRate);
-
     NavigationInfo getNavInfo();
+
+    void setLocInfo(LocationInfo info);
+
+    boolean isNavStop();
+
+    void mSpeak(String text, int mode);
+
+    void close();
 }
