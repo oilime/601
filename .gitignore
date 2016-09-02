@@ -40,3 +40,5 @@ captures/
 /app/src/main/res/drawable-xxhdpi/
 /app/libs/
 /app/build/
+/.idea/
+/gradle/

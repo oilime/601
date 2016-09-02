@@ -187,7 +187,6 @@ public class NavigationActivity extends AppCompatActivity {
                 /**
                  * 设置串口通信方式
                  */
-
                 AlertDialog.Builder builder = new AlertDialog.Builder(NavigationActivity.this);
                 builder.setTitle("请选择串口通信方式");
                 final String[] portList = {"设备文件方式", "CDCACM", "CP21", "FTDI", "PROLIFIC"};
@@ -224,7 +223,6 @@ public class NavigationActivity extends AppCompatActivity {
                 /**
                  * 设置串口信息发送速率
                  */
-
                 AlertDialog.Builder rateBuilder = new AlertDialog.Builder(NavigationActivity.this);
                 rateBuilder.setTitle("请选择串口发送速率");
                 final String[] rateList = {"2000ms", "1000ms", "500ms", "100ms"};
@@ -258,7 +256,6 @@ public class NavigationActivity extends AppCompatActivity {
                 /**
                  * 设置导航语音播报速率
                  */
-
                 AlertDialog.Builder voiceBuilder = new AlertDialog.Builder(NavigationActivity.this);
                 voiceBuilder.setTitle("请选择语音导航播报速率");
                 final String[] voiceRateList = {"30s", "60s", "90s", "15s"};
@@ -292,7 +289,6 @@ public class NavigationActivity extends AppCompatActivity {
                 /**
                  * 发送路径信息
                  */
-
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -348,7 +344,6 @@ public class NavigationActivity extends AppCompatActivity {
                 /**
                  * 接收路径信息
                  */
-
                 refreshScreen("start to recv...\n");
                 new Thread(new Runnable() {
                     @Override
@@ -400,7 +395,6 @@ public class NavigationActivity extends AppCompatActivity {
                 /**
                  * 开始导航
                  */
-
                 if (myOrder != null) {
                     myOrder.stop();
                     myOrder = null;

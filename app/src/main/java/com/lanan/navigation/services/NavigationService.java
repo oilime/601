@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
 
 import com.lanan.navigation.control.DataTask;
 import com.lanan.zigbeetransmission.dataclass.LocationInfo;
@@ -35,8 +34,6 @@ public class NavigationService extends Service implements ServiceInterface {
     private NavigationThread navThread;
     private LocationThread locationThread;
 
-    private final String TAG = "Emilio";
-
     private static TextToSpeech speech;
 
     public NavigationService() {
@@ -56,14 +53,15 @@ public class NavigationService extends Service implements ServiceInterface {
             public void onInit(int status) {
             }
         });
-        Log.d(TAG, "语音初始化完成");
 
         locationThread = new LocationThread();
         pool.execute(locationThread);
-        Log.d(TAG, "gps获取线程开启成功");
         return new ServiceBinder();
     }
 
+    /**
+     * 获取gps信息线程
+     */
     private class LocationThread extends Thread {
 
         private boolean gpsStop;
@@ -89,6 +87,9 @@ public class NavigationService extends Service implements ServiceInterface {
         }
     }
 
+    /**
+     * 语音播报线程
+     */
     private class VoiceThread extends Thread {
 
         private int voiceRate = 30;
@@ -127,6 +128,10 @@ public class NavigationService extends Service implements ServiceInterface {
         }
     }
 
+    /**
+     * 导航信息处理Handler
+     */
+    @SuppressWarnings("unused")
     private class NavigationThread extends Thread {
 
         private int navRate = 2000;
@@ -166,6 +171,7 @@ public class NavigationService extends Service implements ServiceInterface {
     /**
      * 语音提示Handler
      */
+    @SuppressWarnings({"unused", "deprecation"})
     private static class VoiceHandler extends Handler {
         private final WeakReference<Service> mService;
 
@@ -202,18 +208,15 @@ public class NavigationService extends Service implements ServiceInterface {
 
         dataTask = new DataTask();
         dataTask.setDestination(locationInfos);
-        dataTask.start();
-        Log.d(TAG, "dataTask开始");
+        pool.execute(dataTask);
 
         isNavStop = false;
         voiceThread = new VoiceThread();
         voiceThread.setVoiceRate(voiceRate);
         pool.execute(voiceThread);
-        Log.d(TAG, "voiceThread开始");
 
         navThread = new NavigationThread();
         pool.execute(navThread);
-        Log.d(TAG, "navThread开始");
     }
 
     @Override
@@ -223,19 +226,16 @@ public class NavigationService extends Service implements ServiceInterface {
         if (voiceThread != null) {
             voiceThread.setVoiceStop(true);
             voiceThread = null;
-            Log.d(TAG, "voiceThread退出");
         }
 
         if (navThread != null) {
             navThread.setNavStop(true);
             navThread = null;
-            Log.d(TAG, "navThread退出");
         }
 
         if (dataTask != null) {
             dataTask.setInterrupt(true);
             dataTask = null;
-            Log.d(TAG, "dataTask退出");
         }
     }
 
@@ -269,6 +269,7 @@ public class NavigationService extends Service implements ServiceInterface {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void mSpeak(String text, int mode) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             speech.speak(text, mode, null, null);
@@ -284,13 +285,11 @@ public class NavigationService extends Service implements ServiceInterface {
             speech.stop();
             speech.shutdown();
             speech = null;
-            Log.d(TAG, "speech关闭");
         }
 
         if (locationThread != null) {
             locationThread.setGpsStop(true);
             locationThread = null;
-            Log.d(TAG, "gps关闭");
         }
     }
 
@@ -299,6 +298,9 @@ public class NavigationService extends Service implements ServiceInterface {
         close();
     }
 
+    /**
+     * 获取当前位置经纬度
+     */
     private synchronized LocationInfo getLocInfo() {
         if (location != null) {
             return location;
