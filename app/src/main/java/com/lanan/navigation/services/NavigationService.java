@@ -21,14 +21,13 @@ import java.util.concurrent.Executors;
 
 public class NavigationService extends Service implements ServiceInterface {
 
+    private int voiceRate = 30;
+    private boolean isNavStop = false;
+    private boolean navFlag = true;
     private DataTask dataTask;
     private ArrayList<LocationInfo> locationInfos = new ArrayList<>();
     private NavigationInfo info;
     private LocationInfo location;
-
-    private int voiceRate = 30;
-    private boolean isNavStop = false;
-    private boolean navFlag = true;
     private ExecutorService pool = Executors.newCachedThreadPool();
     private VoiceThread voiceThread;
     private NavigationThread navThread;
@@ -83,7 +82,6 @@ public class NavigationService extends Service implements ServiceInterface {
                     e.printStackTrace();
                 }
             }
-
         }
     }
 

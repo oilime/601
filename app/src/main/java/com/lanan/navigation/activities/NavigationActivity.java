@@ -94,6 +94,7 @@ public class NavigationActivity extends AppCompatActivity {
     private static final int WRITE_EXTERNAL_STORAGE = 8;
 
     private static final String TAG = "Emilio";
+    private static final String COLOR = "#A0141010";
     private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
     private static final DecimalFormat normalFormat = new DecimalFormat("#.00");
     private static final DecimalFormat lngFormat = new DecimalFormat("#.000000");
@@ -212,7 +213,7 @@ public class NavigationActivity extends AppCompatActivity {
                                 break;
                         }
                         Snackbar snackbar = Snackbar.make(container, "当前串口方式为：" + portList[which], Snackbar.LENGTH_SHORT);
-                        snackbar.getView().setBackgroundColor(Color.parseColor("#A0141010"));
+                        snackbar.getView().setBackgroundColor(Color.parseColor(COLOR));
                         snackbar.show();
                         dialog.dismiss();
                     }
@@ -245,7 +246,7 @@ public class NavigationActivity extends AppCompatActivity {
                                 break;
                         }
                         Snackbar snackbar = Snackbar.make(container, "当前串口发送速率为：" + rateList[which], Snackbar.LENGTH_SHORT);
-                        snackbar.getView().setBackgroundColor(Color.parseColor("#A0141010"));
+                        snackbar.getView().setBackgroundColor(Color.parseColor(COLOR));
                         snackbar.show();
                         dialog.dismiss();
                     }
@@ -278,7 +279,7 @@ public class NavigationActivity extends AppCompatActivity {
                                 break;
                         }
                         Snackbar snackbar = Snackbar.make(container, "当前语音播报速率为：" + voiceRateList[which], Snackbar.LENGTH_SHORT);
-                        snackbar.getView().setBackgroundColor(Color.parseColor("#A0141010"));
+                        snackbar.getView().setBackgroundColor(Color.parseColor(COLOR));
                         snackbar.show();
                         dialog.dismiss();
                     }
@@ -317,7 +318,7 @@ public class NavigationActivity extends AppCompatActivity {
                                     myOrder = null;
                                 } else {
                                     Snackbar snackbar = Snackbar.make(container, "设备文件不存在", Snackbar.LENGTH_SHORT);
-                                    snackbar.getView().setBackgroundColor(Color.parseColor("#A0141010"));
+                                    snackbar.getView().setBackgroundColor(Color.parseColor(COLOR));
                                     snackbar.show();
                                 }
                                 break;
@@ -344,7 +345,7 @@ public class NavigationActivity extends AppCompatActivity {
                 /**
                  * 接收路径信息
                  */
-                refreshScreen("start to recv...\n");
+                refreshScreen("准备接收路径数据\n");
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -460,7 +461,6 @@ public class NavigationActivity extends AppCompatActivity {
                 /**
                  * 停止导航
                  */
-
                 if (myOrder != null) {
                     myOrder.stop();
                     myOrder = null;
