@@ -38,8 +38,18 @@ import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.SDKInitializer;
+import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.MapStatusUpdate;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
+import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.Marker;
+import com.baidu.mapapi.map.MarkerOptions;
+import com.baidu.mapapi.map.OverlayOptions;
+import com.baidu.mapapi.map.PolylineOptions;
+import com.baidu.mapapi.model.LatLng;
 import com.lanan.navigation.R;
-import com.lanan.navigation.draw.MyDraw;
 import com.lanan.navigation.services.NavigationService;
 import com.lanan.zigbeetransmission.Order;
 import com.lanan.zigbeetransmission.dataclass.LocationInfo;
@@ -52,32 +62,36 @@ import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.RuntimePermissions;
+
+@RuntimePermissions
 public class NavigationActivity extends AppCompatActivity {
 
     private static TextView screen;
     private static TextView longitude;
     private static TextView latitude;
 
-//    /**
-//     * 路径：海东青 ---> 往西 ---> 烈士公园西门 ---> 烈士公园南门 ---> 海东青
-//     */
-//    private final double[][] data1 = {{112.992146, 28.210455}, {112.992538,28.21043},
-//            {112.99274,28.21384}, {112.988868,28.214198}, {112.98885,28.214421},
-//            {112.992776,28.214086}, {112.993234,28.214055}, {112.997968,28.213482},
-//            {112.998148,28.21458}, {112.999747,28.21458}, {112.999396,28.209455},
-//            {112.993674,28.209391}, {112.992291,28.209455}, {112.992146, 28.210455}};
-
     /**
-     * 路径：海东青 ---> 烈士公园
+     * 路径：海东青 ---> 往西 ---> 烈士公园西门 ---> 烈士公园南门 ---> 海东青
      */
-    private final double[][] data = {{112.992146, 28.210455}, {112.992538, 28.21043}, {112.99274, 28.21384},
-            {112.997968, 28.213482}, {112.998148, 28.21458}, {112.999747, 28.21458}};
+    private final double[][] data = {{112.992146, 28.210455}, {112.992538,28.21043},
+            {112.99274,28.21384}, {112.988868,28.214198}, {112.98885,28.214421},
+            {112.992776,28.214086}, {112.993234,28.214055}, {112.997968,28.213482},
+            {112.998148,28.21458}, {112.999747,28.21458}, {112.999396,28.209455},
+            {112.993674,28.209391}, {112.992291,28.209455}, {112.992146, 28.210455}};
+
+//    /**
+//     * 路径：海东青 ---> 烈士公园
+//     */
+//    private final double[][] data = {{112.992146, 28.210455}, {112.992538, 28.21043}, {112.99274, 28.21384},
+//            {112.997968, 28.213482}, {112.998148, 28.21458}, {112.999747, 28.21458}};
 
     private boolean isDrawStop;
     private Order myOrder;
-    private MyDraw myDraw;
     private CoordinatorLayout container;
     private LocationClient mLocationClient;
     private ArrayList<LocationInfo> locationInfos = new ArrayList<>();
@@ -109,10 +123,14 @@ public class NavigationActivity extends AppCompatActivity {
 
     private static NavigationService navigationService;
 
+    private MapView mapView;
+    private BaiduMap map;
+    private Marker marker;
+    private BitmapDescriptor locPoint;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         SDKInitializer.initialize(getApplicationContext());
         setContentView(R.layout.huawei);
 
@@ -125,20 +143,10 @@ public class NavigationActivity extends AppCompatActivity {
             actionBar.setDisplayUseLogoEnabled(true);
         }
 
-        myDraw = (MyDraw) this.findViewById(R.id.path);
         longitude = (TextView) this.findViewById(R.id.longitude);
         latitude = (TextView) this.findViewById(R.id.latitude);
         screen = (TextView) this.findViewById(R.id.showtext);
         screen.setMovementMethod(ScrollingMovementMethod.getInstance());
-
-        TextView nw = (TextView) this.findViewById(R.id.nw);
-        TextView ne = (TextView) this.findViewById(R.id.ne);
-        TextView sw = (TextView) this.findViewById(R.id.sw);
-        TextView se = (TextView) this.findViewById(R.id.se);
-        nw.append(myDraw.getParam(MyDraw.location.WEST) + ", " + myDraw.getParam(MyDraw.location.NORTH));
-        ne.append(myDraw.getParam(MyDraw.location.EAST) + ", " + myDraw.getParam(MyDraw.location.NORTH));
-        sw.append(myDraw.getParam(MyDraw.location.WEST) + ", " + myDraw.getParam(MyDraw.location.SOUTH));
-        se.append(myDraw.getParam(MyDraw.location.EAST) + ", " + myDraw.getParam(MyDraw.location.SOUTH));
 
         PermissionCheck();
         baiduLbsSet();
@@ -149,6 +157,14 @@ public class NavigationActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         this.registerReceiver(mScreenReceiver, filter);
+
+        mapView = (MapView) this.findViewById(R.id.path);
+        map = mapView.getMap();
+        locPoint = BitmapDescriptorFactory.fromResource(R.drawable.loc);
+
+        LatLng center = new LatLng(28.210455, 112.992146);
+        MapStatusUpdate mapStatus = MapStatusUpdateFactory.newLatLngZoom(center, 15);
+        map.setMapStatus(mapStatus);
     }
 
     /**
@@ -403,12 +419,33 @@ public class NavigationActivity extends AppCompatActivity {
                 myOrder = new Order(data);
                 myOrder.setPackage();
                 locationInfos = myOrder.getLocationDataList();
+
+                List<LatLng> pts = new ArrayList<>();
                 for (LocationInfo infos : locationInfos) {
-                    if (infos.equals(locationInfos.get(0)))
-                        myDraw.drawOrigin(infos);
-                    else
-                        myDraw.drawNew(infos);
+                    LatLng pt = new LatLng(infos.getLat(), infos.getLng());
+                    pts.add(pt);
+                    if (infos.equals(locationInfos.get(0))){
+                        BitmapDescriptor bitmap = BitmapDescriptorFactory
+                                .fromResource(R.drawable.mark_fill);
+                        OverlayOptions option = new MarkerOptions()
+                                .position(pt)
+                                .icon(bitmap);
+                        map.addOverlay(option);
+                    } else if (infos.equals(locationInfos.get(locationInfos.size() - 1))) {
+                        BitmapDescriptor bitmap = BitmapDescriptorFactory
+                                .fromResource(R.drawable.mark_end);
+                        OverlayOptions option = new MarkerOptions()
+                                .position(pt)
+                                .icon(bitmap);
+                        map.addOverlay(option);
+                    }
                 }
+                OverlayOptions polyLine = new PolylineOptions()
+                        .points(pts)
+                        .width(5)
+                        .color(0xAAFF0000);
+                map.addOverlay(polyLine);
+
                 navigationService.startNav(locationInfos);
 
                 Message startMessage = new Message();
@@ -478,6 +515,11 @@ public class NavigationActivity extends AppCompatActivity {
                 bundle1.putString("text", "停止！");
                 clMessage.setData(bundle1);
                 showHandler.sendMessage(clMessage);
+                break;
+            case R.id.next:
+                if (!navigationService.isNavStop()) {
+                    navigationService.nextDest();
+                }
                 break;
             default:
                 break;
@@ -609,7 +651,8 @@ public class NavigationActivity extends AppCompatActivity {
     /**
      * 百度地图参数设置
      */
-    private void baiduLbsSet() {
+    @NeedsPermission({Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+    protected void baiduLbsSet() {
         mLocationClient = new LocationClient(getApplicationContext());
         /**
          * 百度地图设置
@@ -643,6 +686,16 @@ public class NavigationActivity extends AppCompatActivity {
                 if (navigationService != null) {
                     navigationService.setLocInfo(info);
                 }
+
+                if (marker != null) {
+                    marker.remove();
+                    marker = null;
+                }
+
+                OverlayOptions option = new MarkerOptions()
+                        .position(new LatLng(info.getLat(), info.getLng()))
+                        .icon(locPoint);
+                marker = (Marker) map.addOverlay(option);
             }
         });
 
@@ -708,11 +761,24 @@ public class NavigationActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
     /**
      * 资源释放，服务停止，广播接收注销
      */
     @Override
     protected void onDestroy() throws SecurityException {
+        super.onDestroy();
         isDrawStop = true;
         if (myOrder != null) {
             myOrder.stop();
@@ -726,6 +792,6 @@ public class NavigationActivity extends AppCompatActivity {
 
         this.unbindService(serviceConnection);
         this.unregisterReceiver(mScreenReceiver);
-        super.onDestroy();
+        mapView.onDestroy();
     }
 }

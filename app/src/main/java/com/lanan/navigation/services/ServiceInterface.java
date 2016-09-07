@@ -39,6 +39,11 @@ public interface ServiceInterface {
     void setLocInfo(LocationInfo info);
 
     /**
+     * 略过当前路径点
+     */
+    void nextDest();
+
+    /**
      * 导航过程的标识位
      *
      * @return 导航是否停止

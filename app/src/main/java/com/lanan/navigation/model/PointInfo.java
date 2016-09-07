@@ -1,5 +1,6 @@
 package com.lanan.navigation.model;
 
+@SuppressWarnings("unused")
 public class PointInfo {
 
     private double lng;

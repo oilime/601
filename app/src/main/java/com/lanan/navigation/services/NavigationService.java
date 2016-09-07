@@ -262,6 +262,13 @@ public class NavigationService extends Service implements ServiceInterface {
     }
 
     @Override
+    public void nextDest() {
+        if (dataTask != null) {
+            dataTask.nextDest();
+        }
+    }
+
+    @Override
     public boolean isNavStop() {
         return isNavStop;
     }

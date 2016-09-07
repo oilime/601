@@ -15,7 +15,7 @@ public class DataTask extends Thread {
     private LocationInfo mLocation;
     private TriRegon triRegion;
     private ArrayList<LocationInfo> destination;
-    private int currentL = 0;
+    private volatile int currentL = 0;
     private boolean initFlag = true;
     private boolean interrupt = false;
 
@@ -101,6 +101,11 @@ public class DataTask extends Thread {
         if (currentL == destination.size()) {
             Log.d("Emilio", "arrived");
         }
+    }
+
+    public void nextDest() {
+        if (currentL < destination.size() - 1)
+            currentL++;
     }
 
     public NavigationInfo getInfo() {

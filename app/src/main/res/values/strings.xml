@@ -25,5 +25,6 @@
     <string name="port">DEVICE</string>
     <string name="send">发送</string>
     <string name="recv">接收</string>
+    <string name="next">略过</string>
 
 </resources>
