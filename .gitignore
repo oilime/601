@@ -32,8 +32,6 @@ proguard/
 captures/
 
 *.iml
-.idea/workspace.xml
-.idea/libraries
 
 # Keystore files
 *.jks
@@ -41,4 +39,5 @@ captures/
 /app/libs/
 /app/build/
 /.idea/
-/gradle/
+/projectFilesBackup
+将删除 src/main/res/drawable/

@@ -25,6 +25,7 @@ public class DataTask extends Thread {
         this.destination = destination;
     }
 
+    @SuppressWarnings("unused")
     public boolean isInterrupt() {
         return interrupt;
     }

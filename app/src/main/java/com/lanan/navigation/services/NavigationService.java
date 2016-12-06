@@ -65,7 +65,7 @@ public class NavigationService extends Service implements ServiceInterface {
 
         private boolean gpsStop;
 
-        public void setGpsStop(boolean flag) {
+        void setGpsStop(boolean flag) {
             this.gpsStop = flag;
         }
 
@@ -93,11 +93,11 @@ public class NavigationService extends Service implements ServiceInterface {
         private int voiceRate = 30;
         private boolean voiceStop;
 
-        public void setVoiceRate(int rate) {
+        void setVoiceRate(int rate) {
             this.voiceRate = rate;
         }
 
-        public void setVoiceStop(boolean flag) {
+        void setVoiceStop(boolean flag) {
             this.voiceStop = flag;
         }
 
@@ -139,7 +139,7 @@ public class NavigationService extends Service implements ServiceInterface {
             this.navRate = rate;
         }
 
-        public void setNavStop(boolean flag) {
+        void setNavStop(boolean flag) {
             this.navStop = flag;
         }
 
@@ -173,7 +173,7 @@ public class NavigationService extends Service implements ServiceInterface {
     private static class VoiceHandler extends Handler {
         private final WeakReference<Service> mService;
 
-        public VoiceHandler(Service service) {
+        VoiceHandler(Service service) {
             mService = new WeakReference<>(service);
         }
 

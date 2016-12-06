@@ -5,10 +5,12 @@ import com.lanan.zigbeetransmission.dataclass.NavigationInfo;
 
 import java.util.ArrayList;
 
-public interface ServiceInterface {
+interface ServiceInterface {
 
     /**
      * 开始导航
+     *
+     * @param infos 离散路径点信息
      */
     void startNav(ArrayList<LocationInfo> infos);
 

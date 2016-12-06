@@ -65,10 +65,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.RuntimePermissions;
-
-@RuntimePermissions
 public class NavigationActivity extends AppCompatActivity {
 
     private static TextView screen;
@@ -378,7 +374,6 @@ public class NavigationActivity extends AppCompatActivity {
                                     refreshScreen("未找到传输设备文件,传输中止！\n");
                                     return;
                                 }
-
                                 port = new PortClass(file, 115200, 0);
                                 break;
                             default:
@@ -549,7 +544,7 @@ public class NavigationActivity extends AppCompatActivity {
     private static class MyHandler extends Handler {
         private final WeakReference<Activity> mActivity;
 
-        public MyHandler(Activity activity) {
+        MyHandler(Activity activity) {
             mActivity = new WeakReference<>(activity);
         }
 
@@ -607,7 +602,7 @@ public class NavigationActivity extends AppCompatActivity {
     private static class ShowHandler extends Handler {
         private final WeakReference<Activity> mActivity;
 
-        public ShowHandler(Activity activity) {
+        ShowHandler(Activity activity) {
             mActivity = new WeakReference<>(activity);
         }
 
@@ -651,7 +646,6 @@ public class NavigationActivity extends AppCompatActivity {
     /**
      * 百度地图参数设置
      */
-    @NeedsPermission({Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
     protected void baiduLbsSet() {
         mLocationClient = new LocationClient(getApplicationContext());
         /**
